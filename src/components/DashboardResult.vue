@@ -8,7 +8,7 @@
           <i class="fas fa-car"></i>
         </div>
         <div class="card-body">
-          <!-- Platz für zukünftige Chart -->
+          <canvas id="vehicle-chart"></canvas>
         </div>
       </div>
 
@@ -18,7 +18,7 @@
           <i class="fas fa-shopping-cart"></i>
         </div>
         <div class="card-body">
-          <!-- Platz für zukünftige Chart -->
+          <canvas id="purchases-chart"></canvas>
         </div>
       </div>
 
@@ -28,7 +28,7 @@
           <i class="fas fa-home"></i>
         </div>
         <div class="card-body">
-          <!-- Platz für zukünftige Chart -->
+          <canvas id="house-chart"></canvas>
         </div>
       </div>
 
@@ -38,7 +38,7 @@
           <i class="fas fa-utensils"></i>
         </div>
         <div class="card-body">
-          <!-- Platz für zukünftige Chart -->
+          <canvas id="groceries-chart"></canvas>
         </div>
       </div>
 
@@ -48,39 +48,173 @@
           <i class="fas fa-trash"></i>
         </div>
         <div class="card-body">
-          <!-- Platz für zukünftige Chart -->
+          <canvas id="waste-chart"></canvas>
         </div>
       </div>
     </div>
 
     <div class="charts-container">
       <div class="chart">
-        <!-- Platz für erste Chart -->
+        <canvas id="chart1"></canvas>
       </div>
       <div class="chart">
-        <!-- Platz für zweite Chart -->
+        <canvas id="chart2"></canvas>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import Chart from 'chart.js/auto';
 import NavBar from "./NavBar.vue";
 
 export default {
   name: "DashboardResult",
   components: {
-    NavBar,
+    NavBar
   },
-  data() {
-    return {
-      vehicles: 10,
-      purchases: 25,
-      houses: 5,
-      groceries: 50,
-      waste: 3,
-    };
+  mounted() {
+    this.createVehicleChart();
+    this.createPurchasesChart();
+    this.createHouseChart();
+    this.createGroceriesChart();
+    this.createWasteChart();
   },
+  methods: {
+    createVehicleChart() {
+      const chartData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+        datasets: [
+          {
+            label: 'Anzahl Fahrzeuge',
+            data: [7, 4, 10, 8, 11, 9, 12, 10],
+            backgroundColor: '#ff6384'
+          }
+        ]
+      };
+      const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          yAxes: [{
+            ticks: {
+              min: 0,
+              stepSize: 1 
+            }
+          }]
+        }
+      };
+      this.createChart('vehicle-chart', chartData, options);
+    },
+    createPurchasesChart() {
+      const chartData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+        datasets: [
+          {
+            label: 'Käufe in Euro',
+            data: [200, 350, 400, 450, 600, 500, 550, 700],
+            backgroundColor: '#36a2eb'
+          }
+        ]
+      };
+      const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          yAxes: [{
+            ticks: {
+              min: 0,
+              stepSize: 100 
+            }
+          }]
+        }
+      };
+      this.createChart('purchases-chart', chartData, options);
+    },
+    createHouseChart() {
+      const chartData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+        datasets: [
+          {
+            label: 'Anzahl der Zimmer',
+            data: [3, 3, 4, 4, 4, 5, 5, 5],
+            backgroundColor: '#ffcd56'
+          }
+        ]
+      };
+      const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          yAxes: [{
+            ticks: {
+              min: 0,
+              stepSize: 1 
+            }
+          }]
+        }
+      };
+      this.createChart('house-chart', chartData, options);
+    },
+    createGroceriesChart() {
+      const chartData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+        datasets: [
+          {
+            label: 'Lebensmittel in Euro',
+            data: [150, 200, 250, 300, 350, 400, 450, 500],
+            backgroundColor: '#ff9f40'
+          }
+        ]
+      };
+      const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          yAxes: [{
+            ticks: {
+              min: 0,
+              stepSize: 50 
+            }
+          }]
+        }
+      };
+      this.createChart('groceries-chart', chartData, options);
+    },
+    createWasteChart() {
+      const chartData = {
+        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+        datasets: [
+          {
+            label: 'Menge an Müll in Liter',
+            data: [20, 18, 23, 25, 22, 19, 20, 21],
+            backgroundColor: '#4bc0c0'
+          }
+        ]
+      };
+      const options = {
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: {
+          yAxes: [{
+            ticks: {
+              min: 0,
+              stepSize: 2 
+            }
+          }]
+        }
+      };
+      this.createChart('waste-chart', chartData, options);
+    },
+    createChart(chartId, chartData, chartOptions) {
+      const ctx = document.getElementById(chartId).getContext('2d');
+      return new Chart(ctx, {
+        type: 'bar',
+        data: chartData,
+        options: chartOptions
+      });
+    }
+  }
 };
 </script>
 

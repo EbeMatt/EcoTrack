@@ -139,6 +139,8 @@
   </div>
   
 </template>
+
+
 <script>
 import Chart from 'chart.js/auto';
 import NavBar from './NavBar.vue';

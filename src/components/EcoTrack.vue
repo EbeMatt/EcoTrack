@@ -15,17 +15,17 @@
         <h4 @click="closeLoginCard">X</h4>
         <form method="post"></form>
         <div class="txt_loginCard">
-          <input type="text" required>
+          <input id="nameLogin" type="text" required>
           <span></span>
           <label>Benutzername</label>
         </div>
         <div class="txt_loginCard">
-          <input type="password" required>
+          <input id="passwordLogin" type="password" required>
           <span></span>
           <label>Password</label>
         </div>
         <div class="pass">Password vergessen?</div>
-        <input class="btn-Logincard" type="submit" value="Login">
+        <input class="btn-Logincard" type="submit" @click="submitLogin()" value="Login">
         <div class="signupLink">Registrieren? <a href="#">Sign Up</a></div>
       </div>
 
@@ -34,7 +34,7 @@
         <h4 @click="closeSignUpCard">X</h4>
         <form method="post"></form>
         <div class="txt_signUpCard">
-          <input type="text" required>
+          <input id="nameRegister" type="text" required>
           <span></span>
           <label>Name</label>
         </div>
@@ -44,7 +44,7 @@
           <label>Email</label>
         </div>
         <div class="txt_signUpCard">
-          <input type="password" required>
+          <input id="passwordRegister" type="password" required>
           <span></span>
           <label>Password</label>
         </div>
@@ -55,7 +55,7 @@
         </div>
         <input class="positionOfCheckbox" type="checkbox" v-model="checkboxChecked">
         <p>Ich akzeptiere die <strong>Richtlinien</strong> dieser Firma.</p>
-        <input class="btn-signUpCard" type="submit" value="Sign Up" :disabled="!checkboxChecked">
+        <input class="btn-signUpCard" type="submit" @click="submitClicked()" value="Sign Up" :disabled="!checkboxChecked">
         <div class="loginLink">Sie haben schon einen Account? <a href="#">Login</a></div>
       </div>
     </div>
@@ -67,6 +67,9 @@
 
 
 <script>
+
+import axios from 'axios';
+
 export default {
   data() {
     return {
@@ -92,7 +95,48 @@ export default {
     },
     toggleSignUpButton() {
       this.checkboxChecked = !this.checkboxChecked;
-    }
+    },
+
+    submitClicked() {
+
+      const name = document.getElementById("nameRegister").value;
+      const password = document.getElementById("passwordRegister").value;
+
+      axios.post('http://localhost:3000/register', {
+        name: name,
+        password: password,
+      })
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    },
+    submitLogin() {
+
+      const name = document.getElementById("nameLogin").value;
+      const password = document.getElementById("passwordLogin").value;
+
+      axios.post('http://localhost:3000/login', {
+        name: name,
+        password: password,
+      })
+      .then(function (response) {
+        console.log(response);
+        if(response.data.user_id > 0) {
+          // auf webseite navigieren!
+        }
+        else{ 
+          // Fehlermeldung angeben
+        }
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+
+    },
    },
   mounted() {
     const loginLink = document.querySelector('.loginLink a');
@@ -107,7 +151,8 @@ export default {
 
     loginLink.removeEventListener('click', this.openLoginCard);
     signUpLink.removeEventListener('click', this.openSignUpCard);
-  }
+  },
+
 };
 
 </script >
