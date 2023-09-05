@@ -1,55 +1,56 @@
 <template>
   <div class="containerFrontPage">
-    <div class="boxPicture">
-      <img src="../assets/Logo1.png">
-      <h1>Willkommen bei <span>EcoTrack</span></h1>
-      <p>Starten <strong>Sie</strong> jetzt und verfolgen Sie ihren ökologischen Fußabdruck</p>
-      <div class="container">
-      <button class="btn-frontPage" @click="openLoginCard">Login</button>
-      <button class="btn-frontPage" @click="openSignUpCard">Sign Up</button>
-    </div>
+     <div class="boxPicture">
+         <img src="../assets/Logo1.png">
+                <h1>Willkommen bei <span>EcoTrack</span></h1>
+                         <p>Starten <strong>Sie</strong> jetzt und verfolgen Sie ihren ökologischen Fußabdruck</p>
+                                  <div class="container">
+                                          <button class="btn-frontPage" @click="openLoginCard">Login</button>
+                                                  <button class="btn-frontPage" @click="openSignUpCard">Sign Up</button>
+                                                   </div>
       <p>Created by Ebenberger Matthias</p>
 
-      <div class="loginCard" :style="{ display: loginCardVisible ? 'block' : 'none' }">
-        <h1>Login</h1>
-        <h4 @click="closeLoginCard">X</h4>
-        <form method="post"></form>
-        <div class="txt_loginCard">
-          <input id="nameLogin" type="text" required>
-          <span></span>
-          <label>Benutzername</label>
-        </div>
-        <div class="txt_loginCard">
-          <input id="passwordLogin" type="password" required>
-          <span></span>
-          <label>Password</label>
-        </div>
-        <div class="pass">Password vergessen?</div>
-        <input class="btn-Logincard" type="submit" @click="submitLogin()" value="Login">
-        <div class="signupLink">Registrieren? <a href="#">Sign Up</a></div>
-      </div>
+                 <div class="loginCard" :style="{ display: loginCardVisible ? 'block' : 'none' }">
+                                                      <h1>Login</h1>
+                                                             <h4 @click="closeLoginCard">X</h4>
+                                                                <form method="post"></form>
+                                                                       <div class="txt_loginCard">
+                                                                         <input id="nameLogin" type="text" required>
+                                                                         <span></span>
+                                                                         <label>Benutzername</label>
+                                                                       </div>
+                                                   <div class="txt_loginCard">
+                                                     <input id="passwordLogin" type="password" required>
+                                                     <span></span>
+                                                     <label>Password</label>
+                                                   </div>
+                                    <div class="pass">Password vergessen?</div>
+                                    <input class="btn-Logincard" type="submit" @click="submitLogin()" value="Login">
+                                    <div class="signupLink">Registrieren? <a href="#">Sign Up</a></div>
+                                  </div>
 
       <div class="signUpCard" :style="{ display: signUpCardVisible ? 'block' : 'none' }">
         <h1>Sign Up</h1>
         <h4 @click="closeSignUpCard">X</h4>
         <form method="post"></form>
+                                  <div class="txt_signUpCard">
+                                    <input id="nameRegister" type="text" required>
+                                    <span></span>
+                                    <label>Name</label>
+                                  </div>
+                                              <div class="txt_signUpCard">
+                                                <input id="emailRegister" type="email" required>
+                                                <span></span>
+                                                <label>Email</label>
+                                              </div>
         <div class="txt_signUpCard">
-          <input id="nameRegister" type="text" required>
-          <span></span>
-          <label>Name</label>
-        </div>
+    <input id="passwordRegister" v-model="password" @input="validatePassword" type="password" required >
+    <span></span>
+    <p v-if="passwordErrorMessage && password !== ''" :style="{ color: 'red' }">{{ passwordErrorMessage }}</p>
+    <label>Password</label>
+  </div>
         <div class="txt_signUpCard">
-          <input type="email" required>
-          <span></span>
-          <label>Email</label>
-        </div>
-        <div class="txt_signUpCard">
-          <input id="passwordRegister" type="password" required>
-          <span></span>
-          <label>Password</label>
-        </div>
-        <div class="txt_signUpCard">
-          <input type="password" required>
+          <input id="confirmRegister" type="password" required>
           <span></span>
           <label>Confirm Password</label>
         </div>
@@ -70,12 +71,15 @@
 
 import axios from 'axios';
 
+
+
 export default {
   data() {
     return {
       loginCardVisible: false,
       signUpCardVisible: false,
-      checkboxChecked: false
+      checkboxChecked: false,
+      password: '',
     };
   },
   methods: {
@@ -96,15 +100,38 @@ export default {
     toggleSignUpButton() {
       this.checkboxChecked = !this.checkboxChecked;
     },
+    validatePassword() {
+      const password = this.password;
+      let errorMessage = '';
+
+      if (password.length < 8) {
+        errorMessage += 'Das Passwort muss mindestens 8 Zeichen lang sein. ';
+      }
+
+      if (!/[A-Z]/.test(password)) {
+        errorMessage += 'Das Passwort muss mindestens einen Großbuchstaben enthalten. ';
+      }
+
+      if (!/[!@#$%^&*()_+{}[\]:;<>,.?~-]/.test(password)) {
+            errorMessage += 'Das Passwort muss mindestens ein Sonderzeichen enthalten. ';
+      }
+
+      this.passwordErrorMessage = errorMessage;
+    },
+    
 
     submitClicked() {
 
       const name = document.getElementById("nameRegister").value;
       const password = document.getElementById("passwordRegister").value;
+      const email = document.getElementById("emailRegister").value;
+      const confirmPw = document.getElementById("confirmRegister").value;
 
       axios.post('http://localhost:3000/register', {
         name: name,
         password: password,
+        email: email,
+        confirmPw: confirmPw,
       })
       .then(function (response) {
         console.log(response);
@@ -118,6 +145,7 @@ export default {
 
       const name = document.getElementById("nameLogin").value;
       const password = document.getElementById("passwordLogin").value;
+      const vm = this;
 
       axios.post('http://localhost:3000/login', {
         name: name,
@@ -126,10 +154,15 @@ export default {
       .then(function (response) {
         console.log(response);
         if(response.data.user_id > 0) {
-          // auf webseite navigieren!
+          
+          localStorage.setItem('token', response.data.token);
+          localStorage.setItem('userId', response.data.user_id);
+
+
+          vm.$router.push('/home');// auf webseite navigieren!
         }
         else{ 
-          // Fehlermeldung angeben
+          alert('Falscher Benutzername oder Falsches Passwort');// Fehlermeldung angeben
         }
       })
       .catch(function (error) {
@@ -152,6 +185,7 @@ export default {
     loginLink.removeEventListener('click', this.openLoginCard);
     signUpLink.removeEventListener('click', this.openSignUpCard);
   },
+
 
 };
 

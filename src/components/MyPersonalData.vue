@@ -11,15 +11,15 @@
         <label for="gender">Geschlecht:</label>
 
          <select id="gender">
-           <option value="männlich">männlich</option>
-           <option value="weiblich">weiblich</option>
+           <option value="male">männlich</option>
+           <option value="female">weiblich</option>
            <option value="diverse">diverse</option>
          </select><br>
 
          <label for="work">Arbeit: (Pal-Faktor)</label>
          <input type="text" name="work" id="work" placeholder="Arbeit">
 
-         <button class="save-button">Speichern</button>
+         <button class="save-button" @click="saveData()">Speichern</button>
 
     </div>
 
@@ -29,14 +29,39 @@
 
 </template>
 
+
 <script>
+import axios from 'axios';
+import { parseToken } from './tokenUtils';
+
 export default {
   name: 'MyPersonalData',
   methods: {
     closePersonalData() {
       this.$emit('closePersonalData');
-    }
-  }
+    },
+    async saveData() {
+      const birthday = document.getElementById("birthday").value;
+      const gender = document.getElementById("gender").value;
+      const work = document.getElementById("work").value;
+
+      const token = localStorage.getItem('token');
+      const decodedToken = parseToken(token);
+
+      axios.post('http://localhost:3000/savePersonalData', {
+        userId: decodedToken.id,
+        birthday: birthday,
+        gender: gender,
+        work: work,
+      })
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+    },
+  },
 };
 </script>
 
