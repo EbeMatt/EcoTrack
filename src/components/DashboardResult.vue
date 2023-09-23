@@ -14,11 +14,11 @@
 
       <div class="card">
         <div class="card-header">
-          <h2>Käufe</h2>
+          <h2>Erspartes C02 und Geld. Wöchentlich</h2>
           <i class="fas fa-shopping-cart"></i>
         </div>
         <div class="card-body">
-          <canvas id="purchases-chart"></canvas>
+          <canvas id="savingsData"></canvas>
         </div>
       </div>
 
@@ -28,7 +28,7 @@
           <i class="fas fa-home"></i>
         </div>
         <div class="card-body">
-          <canvas id="house-chart"></canvas>
+          <canvas id="chartHouseData"></canvas>
         </div>
       </div>
 
@@ -67,154 +67,360 @@
 <script>
 import Chart from 'chart.js/auto';
 import NavBar from "./NavBar.vue";
+import axios from 'axios';
+import { parseToken } from './tokenUtils';
 
 export default {
   name: "DashboardResult",
   components: {
     NavBar
   },
+  data() {
+    return {
+      vehicleCarData: [],
+      savingsData: [],
+      houseData: [],
+      chart: null,
+      chartSavings: null,
+      chartHouseData: null,
+    };
+  },
   mounted() {
-    this.createVehicleChart();
-    this.createPurchasesChart();
-    this.createHouseChart();
-    this.createGroceriesChart();
-    this.createWasteChart();
+    this.fetchCarData();
+    this.fetchSavingsData();
+    this.fetchHouseData();
   },
   methods: {
-    createVehicleChart() {
-      const chartData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        datasets: [
-          {
-            label: 'Anzahl Fahrzeuge',
-            data: [7, 4, 10, 8, 11, 9, 12, 10],
-            backgroundColor: '#ff6384'
-          }
-        ]
-      };
-      const options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          yAxes: [{
-            ticks: {
-              min: 0,
-              stepSize: 1 
-            }
-          }]
+    async fetchCarData() {
+      try {
+          
+        const token = localStorage.getItem('token');
+        const decodedToken = parseToken(token);
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`, // Setze den Token als Authentifizierungs-Header
+      },
+      params: {
+        userId: decodedToken.id, // Füge den userId als Parameter hinzu
+      },
+    };
+    
+
+
+          const response = await axios.get('http://localhost:3000/saveVehicleCar', config);
+          const data = response.data.data;
+          console.log('Response Data:', response.data);
+
+        
+
+          const labels = data.map((item) => item.Brand); // Beachte den Spaltennamen 'Brand'
+          const Co2Emission = data.map((item) => item.Co2Emission); // Beachte den Spaltennamen 'Co2Emission'
+          const footprint = data.map((item) => item.Footprint);
+
+        const chartData = {
+          labels: labels,
+          datasets: [
+            {
+              label: 'CO2-Emission',
+              data: Co2Emission,
+              backgroundColor: 'rgba(75, 192, 192, 0.7)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1,
+            },
+            {
+              label: 'Ökologischer Fußabdruck',
+              data: footprint,
+              backgroundColor: 'rgba(255, 159, 64, 0.7)',
+              borderColor: 'rgba(255, 159, 64, 1)',
+              borderWidth: 1,
+            },
+          ],
+        };
+
+        if (this.chart) {
+          this.chart.destroy();
         }
-      };
-      this.createChart('vehicle-chart', chartData, options);
+
+        const ctx = document.getElementById('vehicle-chart').getContext('2d');
+        this.chart = new Chart(ctx, {
+          type: 'bar',
+          data: chartData,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                min: 0,
+                stepSize: 2,
+                ticks: {
+                  color: 'black',
+                },
+              },
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: 'CO2-Emission und Ökologischer Fußabdruck',
+                color: 'black',
+              },
+              legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                  color: 'black',
+                },
+              },
+              datalabels: {
+                display: false,
+              },
+            },
+            doughnut: {
+              borderWidth: 1,
+              categoryPercentage: 0.5,
+            },
+          },
+        });
+      } catch (error) {
+        console.log(error);
+      }
     },
-    createPurchasesChart() {
-      const chartData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        datasets: [
-          {
-            label: 'Käufe in Euro',
-            data: [200, 350, 400, 450, 600, 500, 550, 700],
-            backgroundColor: '#36a2eb'
-          }
-        ]
-      };
-      const options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          yAxes: [{
-            ticks: {
-              min: 0,
-              stepSize: 100 
-            }
-          }]
+
+    async fetchSavingsData() {
+  try {
+    const token = localStorage.getItem('token');
+    const decodedToken = parseToken(token);
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        userId: decodedToken.id,
+      },
+    };
+
+    const startOfWeek = new Date();
+    startOfWeek.setHours(0, 0, 0, 0);
+    startOfWeek.setDate(startOfWeek.getDate() - startOfWeek.getDay() + 1);
+
+    // Füge das Startdatum der aktuellen Woche als Parameter hinzu
+    config.params.weekStartDate = startOfWeek.toISOString();
+
+    const response = await axios.get('http://localhost:3000/saveSavingData', config);
+
+    if (response.status === 200) {
+      const data = response.data.data;
+      console.log("Response Data", data);
+
+      if (Array.isArray(data) && data.length > 0) {
+        const co2_savings = data.map((item) => parseFloat(item.co2_savings));
+        const money_savings = data.map((item) => parseFloat(item.money_savings));
+
+        const chartDataSavings = {
+  labels: ['Woche 1', 'Woche 2', 'Woche 3'], // Hier fügen Sie Ihre Zeitpunkte oder Labels ein
+  datasets: [
+    {
+      label: "C02-Ersparnis",
+      data: co2_savings,
+      backgroundColor: 'rgba(75, 192, 192, 0.7)',
+      borderColor: 'rgba(75, 192, 192, 1)',
+      borderWidth: 1,
+    },
+    {
+      label: "Geldersparnis",
+      data: money_savings,
+      backgroundColor: 'rgba(255, 159, 64, 0.7)',
+      borderColor: 'rgba(255, 159, 64, 1)',
+      borderWidth: 1,
+    },
+  ],
+};
+
+        if (this.chartSavings) {
+          this.chartSavings.destroy();
         }
-      };
-      this.createChart('purchases-chart', chartData, options);
-    },
-    createHouseChart() {
-      const chartData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        datasets: [
-          {
-            label: 'Anzahl der Zimmer',
-            data: [3, 3, 4, 4, 4, 5, 5, 5],
-            backgroundColor: '#ffcd56'
-          }
-        ]
-      };
-      const options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          yAxes: [{
-            ticks: {
-              min: 0,
-              stepSize: 1 
-            }
-          }]
-        }
-      };
-      this.createChart('house-chart', chartData, options);
-    },
-    createGroceriesChart() {
-      const chartData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        datasets: [
-          {
-            label: 'Lebensmittel in Euro',
-            data: [150, 200, 250, 300, 350, 400, 450, 500],
-            backgroundColor: '#ff9f40'
-          }
-        ]
-      };
-      const options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          yAxes: [{
-            ticks: {
-              min: 0,
-              stepSize: 50 
-            }
-          }]
-        }
-      };
-      this.createChart('groceries-chart', chartData, options);
-    },
-    createWasteChart() {
-      const chartData = {
-        labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
-        datasets: [
-          {
-            label: 'Menge an Müll in Liter',
-            data: [20, 18, 23, 25, 22, 19, 20, 21],
-            backgroundColor: '#4bc0c0'
-          }
-        ]
-      };
-      const options = {
-        responsive: true,
-        maintainAspectRatio: false,
-        scales: {
-          yAxes: [{
-            ticks: {
-              min: 0,
-              stepSize: 2 
-            }
-          }]
-        }
-      };
-      this.createChart('waste-chart', chartData, options);
-    },
-    createChart(chartId, chartData, chartOptions) {
-      const ctx = document.getElementById(chartId).getContext('2d');
-      return new Chart(ctx, {
-        type: 'bar',
-        data: chartData,
-        options: chartOptions
-      });
+
+        const ctx = document.getElementById('savingsData').getContext('2d');
+        this.chartSavings = new Chart(ctx, {
+          type: 'line',
+          data: chartDataSavings,
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                min: 0,
+                stepSize: 2,
+                ticks: {
+                  color: 'black',
+                },
+              },
+            },
+            plugins: {
+              title: {
+                display: true,
+                text: 'C02-Ersparnis und Geldersparnis',
+                color: 'black',
+              },
+              legend: {
+                display: true,
+                position: 'bottom',
+                labels: {
+                  color: 'black',
+                },
+              },
+              datalabels: {
+                display: false,
+              },
+            },
+            doughnut: {
+              borderWidth: 1,
+              categoryPercentage: 0.5,
+            },
+          },
+        });
+      } else {
+        console.error('Keine Daten in der API-Antwort gefunden oder leeres Array.');
+      }
+    } else {
+      console.error('Fehler bei der API-Anfrage. Statuscode:', response.status);
     }
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Daten:', error);
   }
+},
+
+async fetchHouseData() {
+  try {
+    const token = localStorage.getItem('token');
+    const decodedToken = parseToken(token);
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        userId: decodedToken.id,
+      },
+    };
+
+    const currentYear = new Date().getFullYear();
+    config.params.year = currentYear;
+
+    
+
+    const response = await axios.get('http://localhost:3000/saveHouseData', config);
+
+    if (response.status === 200) {
+      const data = response.data.data;
+
+      if (Array.isArray(data) && data.length > 0) {
+        const co2_emissionHeat = data.map((item) => parseFloat(item.co2_emissionHeat));
+        const co2_emission_electricity = data.map((item) => parseFloat(item.co2_emission_electricity));
+
+        const chartHouseData = {
+  labels: ['House'],
+  datasets: [
+    {
+      label: 'C02 Emission Heizung',
+      data: co2_emissionHeat,
+      backgroundColor: 'rgba(75, 192, 192, 0.7)',
+      borderColor: 'rgba(75, 192, 192, 1)',
+      borderWidth: 1,
+      yAxisID: 'y-axis-1', // Verweis auf die erste Y-Achse
+    },
+    {
+      label: 'C02 Emission Strom',
+      data: co2_emission_electricity,
+      backgroundColor: 'rgba(255, 159, 64, 0.7)',
+      borderColor: 'rgba(255, 159, 64, 1)',
+      borderWidth: 1,
+      yAxisID: 'y-axis-2', // Verweis auf die zweite Y-Achse
+    },
+  ],
+};
+
+if (this.chartHouseData) {
+          this.chartHouseData.destroy();
+        }
+
+const ctx = document.getElementById('chartHouseData').getContext('2d');
+this.chartHouseData = new Chart(ctx, {
+  type: 'bar',
+  data: chartHouseData,
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    scales: {
+      y: [
+        {
+          id: 'y-axis-1', // ID der ersten Y-Achse
+          position: 'left', // Position der ersten Y-Achse
+          ticks: {
+            beginAtZero: true,
+            min: 0,
+            stepSize: 500, // Passen Sie den Schritt nach Bedarf an
+            color: 'black',
+          },
+          scaleLabel: {
+            display: true,
+            labelString: 'C02 Emission Heizung',
+          },
+        },
+        {
+          id: 'y-axis-2', // ID der zweiten Y-Achse
+          position: 'right', // Position der zweiten Y-Achse
+          ticks: {
+            beginAtZero: true,
+            min: 0,
+            stepSize: 100, // Passen Sie den Schritt nach Bedarf an
+            color: 'black',
+          },
+          scaleLabel: {
+            display: true,
+            labelString: 'C02 Emission Strom',
+          },
+        },
+      ],
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'C02-Ersparnis und Geldersparnis',
+        color: 'black',
+      },
+      legend: {
+        display: true,
+        position: 'bottom',
+        labels: {
+          color: 'black',
+        },
+      },
+      datalabels: {
+        display: false,
+      },
+    },
+    doughnut: {
+      borderWidth: 1,
+      categoryPercentage: 0.5,
+    },
+  },
+});
+      } else {
+        console.error('Keine Daten in der API-Antwort gefunden oder leeres Array.');
+      }
+    } else {
+      console.error('Fehler bei der API-Anfrage. Statuscode:', response.status);
+    }
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Daten:', error);
+  }
+},
+}
+ 
 };
 </script>
 

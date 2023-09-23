@@ -1,9 +1,10 @@
 <template>
+  
   <div class="container-trash">
-    <img class="trash-image" src="../assets/Trash.png" >
-    <h1>Müll</h1>
+    <div>
+      <NavBar />
+    </div>
     <div class="box-trash">
-      <h4 @click="$emit('closeTrashWaste')">X</h4>
       <label for="waste">Achten Sie auf die Mülltrennung?</label>
       <input type="range" id="trash" min="0" max="50" step="25" list="trash-options" @input="scalaTrashHandler">
       <datalist id="trash-options">
@@ -11,7 +12,7 @@
         <option value="25">Durchschnitt</option>
         <option value="50">Bei mir wird alles getrennt</option>
       </datalist>
-      <p class="selected-option">{{ trash }}</p>
+      <p class="selected-option">{{ trash }}</p> <br>
       <label for="plastik">Umgang mit Plastik?</label>
       <select class="option-style" name="plastik" id="plastik">
         <option value="noPlastik">Ich nutze kein Plastik</option>
@@ -20,6 +21,25 @@
         <option value="trashFacility">Ich fahre zu einer Mülltrennanlage</option>
         <option value="buyPlastic">Ich achte schon beim Kauf auf Plastik</option>
       </select>
+      <label for="plasticUsage">Wie viel kg Plastik verbrauchen Sie pro Monat?</label>
+      <input type="number" id="plasticUsage" v-model="plasticUsageAmount" min="0">
+      <label for="paperType">Welches Papier verwenden Sie?</label>
+      <select class="option-style" name="paperType" id="paperType" v-model="selectedPaper">
+        <option value="freshFiberPaper">Frischfaser-Papier</option>
+        <option value="recycledPaper">Recyceltes Papier</option>
+        <option value="normalPaper">Normales Papier</option>
+      </select>
+      <label for="paperUsage">Wie viel kg Papier verbrauchen Sie pro Monat?</label>
+      <input type="number" id="paperUsage" v-model="paperUsageAmount" min="0">
+      <label for="usageType">Schätzen Sie Ihren Verbrauch:</label>
+      <select class="option-style" name="usageType" id="usageType" v-model="usageEstimate">
+        <option value="average">Durchschnitt (4,2 Kilo pro Woche)</option>
+        <option value="unknown">Ich weiß es nicht, eher durchschnittlich</option>
+        <option value="low">Sehr gering (weniger als 1,5 Kilo pro Woche)</option>
+        <option value="medium">Mäßig (1,5-3 Kilo pro Woche)</option>
+        <option value="high">Hoch (mehr als 3 Kilo pro Woche)</option>
+      </select>
+      <p class="selected-option">CO2-Auswirkungen: {{ calculateCO2Impact }} g/Blatt</p> <br>
       <label for="wasteKg">Restmüll pro Woche?</label>
       <input type="range" id="wasteKg" min="0" max="100" step="25" list="wasteKg-options" @input="scalaWasteHandler">
       <datalist id="wasteKg-options">
@@ -30,19 +50,72 @@
         <option value="100">sehr viel</option>
       </datalist>
       <p class="selected-option">{{ wasteKg }}</p><br>
-      <button class="save-button">Speichern</button>
+      <button class="save-button" @click="saveDataTrash">Speichern</button>
     </div>
+
+    <button class="back-button" @click="$emit('closeTrashWaste')">Zurück zu Meine Daten</button>
+
+    <!-- Tabelle zur Anzeige der gespeicherten Daten -->
+    <table v-if="dataSaved"  class="data-table">
+      <thead>
+        <tr>
+          <th>Papierart</th>
+          <th>Verbrauch pro Monat</th>
+          <th>Verbrauch pro Jahr</th>
+          <th>Verbrauchsschätzung</th>
+          <th>CO2-Auswirkungen pro Blatt</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ selectedPaper }}</td>
+          <td>{{ paperUsageAmount }} Kilo pro Monat</td>
+          <td>{{ usageAmountYear }} Kilo pro Jahr</td>
+          <td>{{ usageEstimate }}</td>
+          <td>{{ calculateCO2Impact.toFixed(2) }} g/Blatt</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <table v-if="dataSaved"  class="data-table">
+  <thead>
+    <tr>
+      <th>Verbrauch pro Monat</th>
+      <th>Verbrauch pro Jahr</th>
+      <th>CO2-Auswirkungen pro kg</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>{{ plasticUsageAmount }} Kilo pro Monat</td>
+      <td>{{ calculatePlasticUsageAmountYear }} Kilo pro Jahr</td> 
+      <td>{{ calculatePlasticCO2Impact.toFixed(2) }} g/kg</td>
+    </tr>
+  </tbody>
+</table>
   </div>
 </template>
 
 <script>
 
+import NavBar from './NavBar.vue';
+
+
 export default {
   name: 'TrashWaste',
+  components: {
+     NavBar,
+  },
   data() {
     return {
       trash: 'Bei mir wird alles getrennt',
       wasteKg: 'durchschnitt',
+      selectedPaper: 'freshFiber', // Default to Frischfaser-Papier
+      paperUsageAmountsageAmount: 0,
+      usageEstimate: 'average',
+      plasticUsageAmount: 0, // Default to Durchschnitt
+      plasticCO2: 0,
+      dataSaved: false, // Flag to track if data has been saved
     };
   },
   methods: {
@@ -80,10 +153,50 @@ export default {
           break;
       }
     },
+    saveDataTrash() {
+      if (this.dataSaved) {
+        // Wenn bereits Daten gespeichert wurden, zeige eine Bestätigungsdialogbox an
+        const confirmResult = window.confirm('Sie haben bereits Werte eingegeben. Möchten Sie diese wirklich ersetzen?');
+        if (!confirmResult) {
+          // Wenn der Benutzer "Abbrechen" auswählt, beende die Funktion ohne weitere Aktion
+          return;
+        }
+      }
+
+      // Set the dataSaved flag to true to display the table
+      this.dataSaved = true;
+    },
     closeTrashWaste() {
       this.$emit('closeTrashWaste');
     },
-    
+  },
+  computed: {
+    calculateCO2Impact() {
+      let co2PerSheet = 0; // CO2-Auswirkungen pro Blatt
+      if (this.selectedPaper === 'freshFiberPaper') {
+        co2PerSheet = 1200 / 16; // 1,200 g CO2 für Frischfaser-Papier, geteilt durch 16 Seiten
+      } else if (this.selectedPaper === 'recycledPaper') {
+        co2PerSheet = 700 / 16; // 700 g CO2 für recyceltes Papier, geteilt durch 16 Seiten
+      } else if (this.selectedPaper === 'normalPaper') {
+        co2PerSheet = 1000 / 16; // 1,000 g CO2 für normales Papier, geteilt durch 16 Seiten
+      }
+      return co2PerSheet * this.usageAmount;
+    },
+    usageAmountYear() {
+      // Annahme: Ein Jahr hat 12 Monate
+      return this.usageAmount * 12;
+    },
+    calculatePlasticCO2Impact() {
+  // CO2-Berechnung für Plastik
+  const plasticCO2PerKg = 5 * 1000; // 5 Tonnen CO2 pro Tonne Plastik, umgerechnet in g
+  const plasticCO2 = (this.plasticUsageAmount * plasticCO2PerKg) / 12; // Monatlicher Verbrauch umgerechnet
+
+  return plasticCO2;// Ergebnis pro Monat
+},
+calculatePlasticUsageAmountYear() {
+    // Annahme: Ein Jahr hat 12 Monate
+    return this.plasticUsageAmount * 12;
+  },
   },
 };
 </script>
@@ -106,15 +219,6 @@ body {
   
 }
 
-.trash-image {
-  position: absolute;
-  top: 20%;
-  width: 30%;
-  height: auto;
-  left: 50px;
-  border: none;
-  
-}
 
 .container-trash {
   position: fixed;
@@ -127,9 +231,9 @@ body {
   justify-content: flex-start; 
   align-items: center;
   z-index: 9999;
-  background: #4b7432;
+  background-image: url('../assets/Background13.png');
   overflow: auto;
-  padding-top: 80px; 
+  padding-top: 150px; 
 }
 
 
@@ -140,8 +244,7 @@ body {
     justify-content: center;
     background: #3c3d42;
     background: linear-gradient(0deg, #f6f8e2 0%, #e0ddca 100%);
-    border: 5px outset black;
-    padding: 2px;
+    padding: 10px;
     width: 30%;
     height: auto;
     border-radius: 10px;             
@@ -149,214 +252,149 @@ body {
 
 
 
-button {
-        align-items: center;
+.save-button {
+  width: 100%; /* Ändere die Breite auf 100% */
+  max-width: 200px; /* Füge eine maximale Breite hinzu, um zu verhindern, dass er zu breit wird */
   appearance: none;
-  background-color: #FCFCFD;
-  border-radius: 4px;
-  border-width: 0;
-  box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px,rgba(45, 35, 66, 0.3) 0 7px 13px -3px,#D6D6E7 0 -3px 0 inset;
+  background-color: #2ea44f;
+  border: 1px solid rgba(27, 31, 35, .15);
+  border-radius: 6px;
+  box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
   box-sizing: border-box;
-  color: #36395A;
+  color: #fff;
   cursor: pointer;
-  display: inline-flex;
-  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-  height: 48px;
+  display: block;
+  align-items: center;
   justify-content: center;
-  line-height: 1;
-  list-style: none;
-  overflow: hidden;
-  padding-left: 16px;
-  padding-right: 16px;
+  font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 20px;
+  padding: 6px 16px;
   position: relative;
-  text-align: left;
+  text-align: center;
   text-decoration: none;
-  transition: box-shadow .15s,transform .15s;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
   white-space: nowrap;
-  will-change: box-shadow,transform;
-  font-size: 18px;
-    }
+  margin: 0 auto;
+}
 
-button:focus {
-  box-shadow: #D6D6E7 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
+
+
+button:focus:not(:focus-visible):not(.focus-visible) {
+  box-shadow: none;
+  outline: none;
 }
 
 button:hover {
-  box-shadow: rgba(45, 35, 66, 0.4) 0 4px 8px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
-  transform: translateY(-2px);
+  background-color: #2c974b;
+}
+
+button:focus {
+  box-shadow: rgba(46, 164, 79, .4) 0 0 0 3px;
+  outline: none;
+}
+
+button:disabled {
+  background-color: #94d3a2;
+  border-color: rgba(27, 31, 35, .1);
+  color: rgba(255, 255, 255, .8);
+  cursor: default;
 }
 
 button:active {
-  box-shadow: #D6D6E7 0 3px 7px inset;
-  transform: translateY(2px);
+  background-color: #298e46;
+  box-shadow: rgba(20, 70, 32, .2) 0 1px 0 inset;
 }
 
-h1 {
-    border: 5px outset black;
-}
 
-.box-trash h4 {
-    position: absolute;
-    color: black;
-    top: 140px;
-    right: 560px;
-}
-
-.box-trash h4:hover {
-    color: rgb(39, 28, 28);
-    cursor: pointer;
-}
 
 .box-trash label {
         font-size: 18px;
         font-weight: bold;
-        margin: 8px;
+        margin-bottom: -5px;
     }
 
-    input[type=range] {
+    .box-trash input, .box-trash select {
+  width: 100%; /* Ändere die Breite auf 100% */
+  max-width: 300px; /* Füge eine maximale Breite hinzu, um zu verhindern, dass sie zu breit werden */
   height: 25px;
-  -webkit-appearance: none;
-  appearance: none;
-  margin: 10px 0;
-  width: 100%;
-}
-input[type=range]:focus {
-  outline: none;
-}
-input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
- 
-  box-shadow: 1px 1px 1px #000000;
-  background: #a9e2f5;
   border-radius: 5px;
-  border: 1px solid #000000;
+  border: 2px solid #2ea44f;
+  margin-bottom: 10px;
+  margin: 10px;
+  text-align: center;
+  font-size: 16px;
 }
-input[type=range]::-webkit-slider-thumb {
-  box-shadow: 1px 1px 1px #000000;
-  border: 1px solid #000000;
-  height: 25px;
-  width: 15px;
-  border-radius: 5px;
-  background: #FFFFFF;
-  cursor: pointer;
-  -webkit-appearance: none;
-  margin-top: -11px;
+
+.box-trash input[type="range"] {
+  appearance: none; /* Entfernt die Standard-Styling */
+  background-color: #2ea44f; /* Setzt die gewünschte Hintergrundfarbe (Grün) */
+  height: 5px; /* Passe die Höhe des Balkens an */
+  border-radius: 3px; /* Runde die Ecken des Balkens ab */
 }
-input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #a9e2f5;
-}
-input[type=range]::-moz-range-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
-  
-  box-shadow: 1px 1px 1px #000000;
-  background: #a9e2f5;
-  border-radius: 5px;
-  border: 1px solid #000000;
-}
-input[type=range]::-moz-range-thumb {
-  box-shadow: 1px 1px 1px #000000;
-  border: 1px solid #000000;
-  height: 20px;
-  width: 15px;
-  border-radius: 5px;
-  background: #FFFFFF;
-  cursor: pointer;
-}
-input[type=range]::-ms-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
-  
-  background: transparent;
-  border-color: transparent;
-  color: transparent;
-}
-input[type=range]::-ms-fill-lower {
-  background: #a9e2f5;
-  border: 1px solid #000000;
-  border-radius: 10px;
-  box-shadow: 1px 1px 1px #000000;
-}
-input[type=range]::-ms-fill-upper {
-  background: #a9e2f5;
-  border: 1px solid #000000;
-  border-radius: 10px;
-  box-shadow: 1px 1px 1px #000000;
-}
-input[type=range]::-ms-thumb {
-  margin-top: 1px;
-  box-shadow: 1px 1px 1px #000000;
-  border: 1px solid #000000;
-  height: 20px;
-  width: 15px;
-  border-radius: 5px;
-  background: #FFFFFF;
-  cursor: pointer;
-}
-input[type=range]:focus::-ms-fill-lower {
-  background: #a9e2f5;
-}
-input[type=range]:focus::-ms-fill-upper {
-  background: #a9e2f5;
+
+/* Ändere die Farbe des Daumens (Punkt) */
+.box-trash input[type="range"]::-webkit-slider-thumb {
+  appearance: none; /* Entfernt die Standard-Styling */
+  width: 15px; /* Breite des Daumens */
+  height: 15px; /* Höhe des Daumens */
+  background-color: #2ea44f; /* Setzt die gewünschte Daumenfarbe (Grün) */
+  border-radius: 50%; /* Macht den Daumen rund */
+  position: relative; /* Position relativ zum Balken */
+  transform: translateY(-10px); /* Positioniere den Daumen innerhalb des Balkens */
 }
 
 
 
-.option-style {
-    justify-content: center;
-    text-align: center;
-      width: 200px;
-      height: 20px;
-      border: none;
-      font-size: 14px;
-      color: #38b4d0;
-      background-color: #eee;
-      border-radius: 5px;
-      box-shadow: 4px 4px #ccc;
-      }
-
-
-      input[type="checkbox"] {
-  position: relative;
-  width: 40px;
-  height: 15px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: #c6c6c6;
-  outline: none;
-  border-radius: 20px;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, .2);
-  transition: .5s;
+.data-table {
+  margin-top: 40px;
+  margin-bottom: 50px;
 }
 
-input[type="checkbox"]::before {
-  content: '';
+.data-table {
+  border: 2px solid black
+}
+
+
+.data-table tr th  {
+  border: 2px solid black;
+  text-align: center;
+  padding: 5px;
+  font-size: 20px;
+  background-color: rgb(219, 186, 186);
+}
+
+td {
+  border: 2px solid black;
+  padding: 5px;
+  font-size: 18px;
+  background-color: rgb(219, 186, 186)
+}
+
+.back-button {
   position: absolute;
-  width: 20px;
-  height: 20px;
-  border-radius: 20px;
-  top: -2.5px;
-  left: -2.5px;
-  background: #fac7c3;
-  transition: .5s;
+  top: 150px;
+  left: 10px; /* 10px Abstand vom rechten Rand */
+  background-color: #22bc1a;
+  color: white; /* Textfarbe auf Weiß setzen */
+  border: none; /* Keine Rand */
+  border-radius: 5px; /* Abrunde Ecken */
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  padding: 10px 20px; /* 10px oben/unten, 20px links/rechts Innenabstand */
+  font-size: 16px; /* Schriftgröße anpassen */
+  transition: background-color 0.3s; /* Sanfter Übergang für die Hintergrundfarbe */
 }
 
-input:checked[type="checkbox"] {
-  background: #38b4d0;
-}
-
-input:checked[type="checkbox"]::before {
-  top: -2.5px;
-  left: 20px;
-  background-color: #fac7c3;
-  transition: .5s;
+/* Hinzufügen eines Hover-Effekts */
+.back-button:hover {
+  background-color: #7d861c; /* Dunklere Hintergrundfarbe im Hover-Zustand */
 }
 
 

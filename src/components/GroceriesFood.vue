@@ -118,6 +118,7 @@
       <button class="calculate-button" @click="calculateCO2Drinks">CO2 berechnen</button>
       <p v-if="totalCO2Drinks > 0" class="total-co2">Gesamt-CO2-Fußabdruck: {{ totalCO2Drinks }} kg CO2-Äquivalent</p>
     </div>
+    <button class="back-button" @click="closeGroceriesFood">Zurück zu Meine Daten</button>
   </div>
 </template>
 
@@ -429,7 +430,7 @@ body {
   justify-content: flex-start;
   align-items: flex-start; /* Änderung auf flex-start für obere Ausrichtung */
   z-index: 9999;
-  background: #4b7432;
+  background-image: url('../assets/Background3.png');
   padding-top: 50px;
   overflow-y: auto;
   
@@ -533,6 +534,28 @@ body {
   background-color: #4CAF50; /* setzt den Hintergrund der Checkbox auf grün */
 }
 
+.back-button {
+  position: absolute;
+  top: 150px;
+  left: 10px; /* 10px Abstand vom rechten Rand */
+  background-color: #22bc1a;
+  color: white; /* Textfarbe auf Weiß setzen */
+  border: none; /* Keine Rand */
+  border-radius: 5px; /* Abrunde Ecken */
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  padding: 10px 20px; /* 10px oben/unten, 20px links/rechts Innenabstand */
+  font-size: 16px; /* Schriftgröße anpassen */
+  transition: background-color 0.3s; /* Sanfter Übergang für die Hintergrundfarbe */
+}
+
+/* Hinzufügen eines Hover-Effekts */
+.back-button:hover {
+  background-color: #7d861c; /* Dunklere Hintergrundfarbe im Hover-Zustand */
+}
 
 
 

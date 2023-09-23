@@ -5,13 +5,12 @@
     </div>
 
     <div class="box-car">
-      <h4 @click="closeVehicleCar">X</h4>
       <label for="cars">Bezeichnung:</label>
       <select name="cars" id="cars" v-model="selectedCarBrand">
   <option v-for="brand in carBrands" :value="brand" :key="brand">{{ brand }}</option>
 </select>
       <label for="buy">Anschaffung:</label>
-      <input type="date">
+      <input type="date" v-model="purchase_date">
       <label for="consumption">Verbrauch je 100km:</label>
       <input type="text" id="consumption" v-model="consumption" placeholder="Verbrauch">
       <label for="fuel">Treibstoff:</label>
@@ -24,6 +23,7 @@
       <input type="text" id="distance" v-model="distance" placeholder="km"><br>
       <button class="save-button" @click="updateChartAndTable">Speichern</button>
     </div>
+    <button class="back-button" @click="closeVehicleCar">Zurück zu Meine Daten</button>
 
     <canvas id="myChart" width="300" height="300"></canvas>
 
@@ -53,8 +53,14 @@
       </tr>
     </tbody>
   </table>
-  <div>
+  <div class="component-spacing">
+    <BerechnungsGrundlageFahrzeug />
+  </div>
+  <div class="component-spacing">
     <FormularC02Kraftstoff />
+  </div>
+  <div class="component-spacing">
+    <HeaderBerechnungProFahrt />
   </div>
 <div>
   <BerechnungProFahrt
@@ -72,6 +78,12 @@ import NavBar from "./NavBar.vue";
 import { Chart } from "chart.js";
 import FormularC02Kraftstoff from "./FormularC02Kraftstoff.vue";
 import BerechnungProFahrt from "./BerechnungProFahrt.vue";
+import { parseToken } from './tokenUtils';
+import axios from 'axios';
+import BerechnungsGrundlageFahrzeug from "./BerechnungsGrundlageFahrzeug.vue";
+import HeaderBerechnungProFahrt from "./HeaderBerechnungProFahrt.vue";
+
+
 
 export default {
   name: "VehicleCar",
@@ -79,7 +91,9 @@ export default {
     NavBar,
     FormularC02Kraftstoff,
     BerechnungProFahrt,
-  },
+    BerechnungsGrundlageFahrzeug,
+    HeaderBerechnungProFahrt
+},
   data() {
     return {
       carBrands: [
@@ -151,6 +165,7 @@ export default {
       selectedCarBrand: null,
       consumption: null,
       distance: null,
+      purchase_date: null,
       selectedFuel: 'diesel',
       chart: null,
       co2Constants: {
@@ -169,84 +184,105 @@ export default {
       this.consumption = consumption;
       this.selectedFuel = selectedFuel;
     },
-    updateChartAndTable() {
-      this.updateChart();
-      // Du kannst hier auch die Tabelle aktualisieren, falls benötigt
-    },
-    updateChart() {
-      if (this.chart) {
-        this.chart.destroy();
-      }
 
-      const ctx = document.getElementById("myChart").getContext("2d");
-      this.chart = new Chart(ctx, {
-        type: "bar",
-        data: {
-          labels: ["", ""],
-          datasets: [
-            {
-              label: "Verbrauch je 100 km",
-              data: [parseFloat(this.consumption), null],
-              backgroundColor: ["rgba(75, 192, 192, 0.2)"],
-              borderColor: ["rgba(75, 192, 192, 1)"],
-              borderWidth: 1,
-            },
-            {
-              label: "Fahrleistung pro Jahr",
-              data: [null, parseFloat(this.distance)],
-              backgroundColor: ["rgba(54, 162, 235, 0.2)"],
-              borderColor: ["rgba(54, 162, 235, 1)"],
-              borderWidth: 1,
-              yAxisID: "y-axis-2",
-            },
-          ],
+
+
+    async updateChartAndTable() {
+  const selectedCarBrand = this.selectedCarBrand; 
+  const purchaseDate = this.purchase_date; 
+  const consumption = this.consumption; 
+  const selectedFuel = this.selectedFuel; 
+  const distance = this.distance; 
+
+  // Fügen Sie hier Überprüfungen auf null oder undefined hinzu
+  if (!selectedCarBrand || !purchaseDate || !consumption || !selectedFuel || !distance) {
+    // Überprüfe, ob alle erforderlichen Werte vorhanden sind
+    console.error("Nicht alle erforderlichen Felder sind ausgefüllt.");
+    return;
+  }
+
+  const token = localStorage.getItem('token');
+  const decodedToken = parseToken(token);
+
+  axios.post('http://localhost:3000/saveVehicleCar', {
+    userId: decodedToken.id,
+    brand: selectedCarBrand,
+    purchaseDate: purchaseDate,
+    consumption: consumption,
+    fuel_type: selectedFuel,
+    distance: distance,
+    co2_emission: this.calculateCO2(selectedFuel),
+    footprint: this.calculateFootprint(selectedFuel),
+  })
+  .then(function (response) {
+    console.log(response);
+  })
+  .catch(function(error){
+    console.log(error);
+  });
+
+  this.updateChart();
+  // Du kannst hier auch die Tabelle aktualisieren, falls benötigt
+},
+
+
+
+updateChart() {
+  if (this.chart) {
+    this.chart.destroy();
+  }
+
+  const ctx = document.getElementById("myChart").getContext("2d");
+  this.chart = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: ["Verbrauch je 100 km", "Fahrleistung pro Jahr"],
+      datasets: [
+        {
+          label: "Daten",
+          data: [parseFloat(this.consumption), parseFloat(this.distance)],
+          backgroundColor: ["rgba(75, 192, 192, 0.7)", "rgba(255, 159, 64, 0.7)"],
+          borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 159, 64, 1)"],
+          borderWidth: 1,
         },
-        options: {
-          scales: {
-            y: {
-              beginAtZero: true,
-              min: 0,
-              max: 14,
-              stepSize: 2,
-              ticks: {
-                color: "white",
-              },
-            },
-            "y-axis-2": {
-              position: "right",
-              beginAtZero: true,
-              grid: {
-                display: false,
-              },
-              ticks: {
-                color: "white",
-              },
-            },
-          },
-          plugins: {
-            title: {
-              display: true,
-              color: "white",
-            },
-            legend: {
-              display: true,
-              position: 'bottom',
-              labels: {
-                color: "white",
-              },
-            },
-            datalabels: {
-              display: false,
-            },
-          },
-          bar: {
-            borderWidth: 1,
-            categoryPercentage: 0.5,
-            barPercentage: 1.0,
-          },
-        },
-      });
+      ],
     },
+    options: {
+      scales: {
+        y: {
+          beginAtZero: true,
+          min: 0,
+          max: 14,
+          stepSize: 2,
+          ticks: {
+            color: "white",
+          },
+        },
+      },
+      plugins: {
+        title: {
+          display: true,
+          color: "white",
+        },
+        legend: {
+          display: true,
+          position: 'bottom',
+          labels: {
+            color: "white",
+          },
+        },
+        datalabels: {
+          display: false,
+        },
+      },
+      bar: {
+        borderWidth: 1,
+        categoryPercentage: 0.5,
+        barPercentage: 1.0,
+      },
+    },
+  });
+},
     calculateCO2(fuel) {
   if (!this.consumption || !this.distance) {
     return 0; // Zeige 0, wenn Verbrauch oder Distanz fehlen
@@ -310,7 +346,7 @@ body {
   justify-content: flex-start; 
   align-items: center;
   z-index: 9999;
-  background: #4b7432;
+  background-image: url('../assets/Background13.png');
   overflow: auto;
   padding-top: 50px; 
 }
@@ -332,9 +368,9 @@ body {
    
 }
 
-button {
-  width: 200px;
-  height: 50px;
+.save-button {
+  width: 100%; /* Ändere die Breite auf 100% */
+  max-width: 200px; /* Füge eine maximale Breite hinzu, um zu verhindern, dass er zu breit wird */
   appearance: none;
   background-color: #2ea44f;
   border: 1px solid rgba(27, 31, 35, .15);
@@ -343,7 +379,7 @@ button {
   box-sizing: border-box;
   color: #fff;
   cursor: pointer;
-  display: flex;
+  display: block;
   align-items: center;
   justify-content: center;
   font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
@@ -357,10 +393,8 @@ button {
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
-  vertical-align: middle;
   white-space: nowrap;
-  margin: 10px;
-  margin-top: 40px;
+  margin: 0 auto;
 }
 
 
@@ -395,45 +429,24 @@ h1 {
     border: 5px outset black;
 }
 
-.box-car h4 {
-    position: absolute;
-    color: black;
-    top: 150px;
-    right: 560px;
-}
 
-.box-car h4:hover {
-    color: rgb(39, 28, 28);
-    cursor: pointer;
-}
 
 .box-car label {
         font-size: 18px;
         font-weight: bold;
-        margin: 4px;
+        margin-bottom: -5px;
     }
 
-    .box-car input {
-  width: 300px;
-  height: 30px;
+    .box-car input, .box-car select {
+  width: 100%; /* Ändere die Breite auf 100% */
+  max-width: 300px; /* Füge eine maximale Breite hinzu, um zu verhindern, dass sie zu breit werden */
+  height: 25px;
   border-radius: 5px;
-  border: 2px solid #2ea44f; /* Aktualisierte Border-Farbe */
+  border: 2px solid #2ea44f;
   margin-bottom: 10px;
   margin: 10px;
   text-align: center;
-  font-size: 20px;
-}
-
-
-    .box-car select {
-  width: 300px;
-  height: 30px;
-  border-radius: 5px;
-  border: 2px solid #2ea44f; /* Aktualisierte Border-Farbe */
-  margin-bottom: 10px;
-  margin: 10px;
-  text-align: center;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 
@@ -462,5 +475,31 @@ td {
   background-color: rgb(219, 186, 186)
 }
 
+.back-button {
+  position: absolute;
+  top: 150px;
+  left: 10px; /* 10px Abstand vom rechten Rand */
+  background-color: #22bc1a;
+  color: white; /* Textfarbe auf Weiß setzen */
+  border: none; /* Keine Rand */
+  border-radius: 5px; /* Abrunde Ecken */
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  padding: 10px 20px; /* 10px oben/unten, 20px links/rechts Innenabstand */
+  font-size: 16px; /* Schriftgröße anpassen */
+  transition: background-color 0.3s; /* Sanfter Übergang für die Hintergrundfarbe */
+}
+
+/* Hinzufügen eines Hover-Effekts */
+.back-button:hover {
+  background-color: #7d861c; /* Dunklere Hintergrundfarbe im Hover-Zustand */
+}
+
+.component-spacing {
+  margin-top: 50px;
+}
 
 </style>

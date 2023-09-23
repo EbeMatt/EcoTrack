@@ -79,7 +79,7 @@ iframe {
   height: 100%;
   width: 15%;
   padding-top: 150px;
-  background: #4b4c52;
+ 
   border-radius: 5px;
   padding: 20px;
   position: fixed;

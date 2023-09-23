@@ -28,9 +28,14 @@ export default {
 
 
 body {
-  background: #4b7432;
+  margin: 0;
+  padding: 0;
+  background-image: url('./assets/Background13.png');
+  background-size: cover; /* oder die gewünschte Größe */
+  background-repeat: no-repeat; /* Keine Wiederholung des Hintergrundbilds */
+  background-attachment: fixed; /* Hintergrundbild bleibt bei Bildschirmscrollen an Ort und Stelle */
+ 
 }
-
 
 </style>
 

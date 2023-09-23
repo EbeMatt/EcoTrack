@@ -25,10 +25,12 @@ import NavBar from './NavBar.vue';
 
 
 
+
 export default {
   name: 'HomeView',
   components: {
     NavBar,
+    
   },
   
 }
@@ -72,13 +74,13 @@ body {
 
 .information-container .welcome-container {
     margin-top: 20px;
-    background-color: #4b4c52;
+    
     width: 45%;
     height: 100%;
     padding: 30px;
     padding-top: 50px;
     border-radius: 10px;
-     color: white;
+     color: black;
     margin-left: 0px;
     
 }

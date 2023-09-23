@@ -18,6 +18,13 @@ import FormularC02Kraftsoff from '@/components/FormularC02Kraftstoff';
 import BerechnungProFahrt from '@/components/BerechnungProFahrt';
 import BillReader from '@/components/BillReader';
 import DashboardResult from'@/components/DashboardResult';
+import HeaderBerechnungProFahrt from '@/components/HeaderBerechnungProFahrt';
+import BerechnungsGrundlageFahrzeug from '@/components/BerechnungsGrundlageFahrzeug.vue';
+import SloganEcotrack from '@/components/SloganEcotrack.vue';
+
+
+
+
 const routes = [
     {
       path: '/home',
@@ -114,6 +121,21 @@ const routes = [
       component: DashboardResult
 
     },
+    {
+      name: 'HeaderBerechnungProFahrt',
+      path: '/headerberechnungprofahrt',
+      component: HeaderBerechnungProFahrt
+    },
+    {
+      name: 'BerechnungsGrundlageFahrzeug',
+      path: '/berechnungsgrundlagefahrzeug',
+      component: BerechnungsGrundlageFahrzeug 
+    },
+    {
+      name: 'SloganEcotrack',
+      path: '/sloganecotrack',
+      component: SloganEcotrack
+    }
   ];
 
 

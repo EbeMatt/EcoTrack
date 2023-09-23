@@ -7,7 +7,6 @@
    
     <div class="box-house">
       <div class="left-side">
-      <h4 @click="closeHouseFlat">X</h4>
       <label for="countHouse" class="left-element">Anzahl der Wohnsitze:</label>
       <select class="option-style" name="contHouse" id="countHouse" v-model="selectedWohnsitze">
         <option value="1">1</option>
@@ -21,8 +20,8 @@
       <p class="left-element">Die Energiekennzahl in (kWh) </p>
       <input type="text" id="heat" name="heat"  v-model="scalaHeat" @input="calculateEnergyClass()">
       <p class="left-element">Die Energieeffizienzklasse ist: {{ energyClass }}</p>
-      <label for="water-heat" class="left-element">Heizen:</label>
-      <select class="option-style" name="water-heat" id="water-heat" v-model="heatingType">
+      <label for="airHeat" class="left-element">Heizen:</label>
+      <select class="option-style" name="airHeat" id="airHeat" v-model="heatingType">
         <option value="wood">Holz,Pellets,Hackschnitzel</option>
         <option value="oil">Öl</option>
         <option value="farheat">Fernwärme</option>
@@ -66,8 +65,8 @@
         <option value="5">5</option>
         <option value="6">6</option>
       </select>
-      <label for="stromverbrauch" class="left-element">Stromverbrauch in kWh?:</label>
-      <input type="text" id="stromverbrauch" name="stromverbrauch"  v-model="powerConsumption">
+      <label for="powerConsumption" class="left-element">Stromverbrauch in kWh?:</label>
+      <input type="text" id="powerConsumption" name="stromverbrauch"  v-model="powerConsumption">
       <label for="powerSelect" class="left-element">Welchen Strom beziehen Sie?</label>
       <select class="option-style" name="powerSelect" id="powerSelect" v-model="electricitySource">
         <option value="europamix">Europäischer Strommix</option>
@@ -83,6 +82,7 @@
       <br>
       <button class="save-button" @click="saveData">Speichern</button>
     </div>
+    <button class="back-button" @click="closeHouseFlat">Zurück zu Meine Daten</button>
     <canvas id="myChart" width="300" height="300"></canvas>
     <div class="table-container">
     <table>
@@ -145,6 +145,8 @@
 import Chart from 'chart.js/auto';
 import NavBar from './NavBar.vue';
 import FormularC02 from './FormularC02.vue';
+import { parseToken } from './tokenUtils';
+import axios from 'axios';
 
 export default {
   name: 'HouseFlat',
@@ -358,29 +360,85 @@ export default {
         options,
       });
     },
-    saveData() {
-      this.calculateHeatingConsumption();
-      this.calculateWaterConsumption();
-      this.calculateEnergyClass();
-      this.chartData = [
-        parseFloat(this.scalaHeat) || 0,
-        parseFloat(this.sizeHouse) || 0,
-        parseFloat(this.powerConsumption) || 0,
-      ];
-      this.chart.destroy();
-      this.createChart();
+      async saveData() {
+
+        const vm = this;
+
+        const token = localStorage.getItem('token');
+        const decodedToken = parseToken(token);
+
+
+     
+      
+      
       const houseData = {
-        sizeHouse: this.sizeHouse,
-        scalaHeat: this.scalaHeat,
-        heatingType: this.heatingType,
-        additionalHeatingType: this.additionalHeatingType,
-        selectedTemperature: this.selectedTemperature,
-        waterHeatingType: this.waterHeatingType,
-        powerConsumption: this.powerConsumption,
-        electricitySource: this.electricitySource,
-        hasPhotovoltaics: this.hasPhotovoltaics,
-      };
-      this.$emit('showHouseData', houseData);
+              userId: decodedToken.id, 
+              countHouse: this.selectedWohnsitze,
+              sizeHouse: this.sizeHouse,
+              heat: this.scalaHeat,
+              airHeat: this.heatingType,
+              addheat: this.additionalHeatingType,
+              temperatur: this.selectedTemperature,
+              waterHeat: this.waterHeatingType,
+              countMember: this.selectedPerson,
+              powerConsumption: this.powerConsumption,
+              powerSelect: this.electricitySource,
+              photovoltaik: this.hasPhotovoltaics,
+               };
+
+               const currentYear = new Date().getFullYear();
+               houseData.year = currentYear;
+
+               const co2Consumption = this.calculateCO2Consumption();
+               const ghaByHeating = this.calculateGha().toFixed(1);
+               const electricityValues = this.calculateCO2andGhaFromElectricity();
+               const co2EmissionFromElectricity = electricityValues.co2Emission.toFixed(1);
+               const ghaByElectricity = electricityValues.gha.toFixed(1);
+
+  // Speichert die berechneten Werte und andere Informationen
+                 houseData.co2_emissionHeat = co2Consumption;
+               houseData.gha_heating = ghaByHeating;
+               houseData.co2_emission_electricity = co2EmissionFromElectricity;
+               houseData.gha_electricity = ghaByElectricity;
+ 
+
+  
+               axios.post('http://localhost:3000/saveHouseData', houseData)
+                 .then(function (response) {
+                   console.log(response);
+      
+
+      // Hier kommt der Code zur Aktualisierung der Benutzeroberfläche und weiterer Berechnungen
+      vm.calculateHeatingConsumption();
+      vm.calculateWaterConsumption();
+      vm.calculateEnergyClass();
+      vm.chartData = [
+        parseFloat(vm.scalaHeat) || 0,
+        parseFloat(vm.sizeHouse) || 0,
+        parseFloat(vm.powerConsumption) || 0,
+      ];
+      vm.chart.destroy();
+      vm.createChart();
+
+      console.log('Daten erfolgreich aktualisiert oder hinzugefügt!');
+    })
+    .catch(function (error) {
+      console.error('Fehler beim Speichern der Daten:', error);
+      // Fehlerbehandlung, falls etwas schiefgeht
+    });
+
+               axios.post('http://localhost:3000/saveHouseData', houseData)
+               .then(function (response) {
+                  console.log(response);
+                })
+                .catch(function (error) {
+                  console.log(error);
+                });
+                
+               
+
+
+               this.$emit('showHouseData', houseData);
     },
   },
 };
@@ -420,7 +478,7 @@ body {
   justify-content: flex-start; 
   align-items: center;
   z-index: 9999;
-  background: #4b7432;
+  background-image: url('../assets/Background13.png');
   overflow: auto;
   padding-top: 50px; 
 }
@@ -429,6 +487,7 @@ body {
 .box-house {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap; /* Erlaube Zeilenumbrüche innerhalb des Containers */
   justify-content: space-between;
   background: #fafafa;
   padding: 20px;
@@ -439,16 +498,13 @@ body {
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
 }
 
-.left-side {
-  flex: 1; /* Lass die linke Seite flexibel, um den verfügbaren Platz zu nutzen */
-  display: flex;
-  flex-direction: column;
-}
-
+.left-side,
 .right-side {
-  flex: 1; /* Lass die rechte Seite flexibel, um den verfügbaren Platz zu nutzen */
+  flex: 1; /* Lass die linke und rechte Seite flexibel, um den verfügbaren Platz zu nutzen */
   display: flex;
   flex-direction: column;
+  flex-basis: calc(50% - 10px); /* Auf 50% der Container-Breite setzen, mit etwas Abstand dazwischen */
+  margin-right: 10px; /* Abstand zwischen den beiden Seiten */
 }
 
 /* Stil für Elemente auf der linken Seite */
@@ -494,23 +550,7 @@ body {
   margin-left: 10px;
 }
 
-.left-side label:nth-child(2),
-.left-side label:nth-child(4),
-.left-side label:nth-child(6),
-.left-side label:nth-child(10),
-.left-side label:nth-child(12),
-.left-side label:nth-child(14),
-.right-side label:nth-child(1),
-.right-side label:nth-child(3),
-.right-side label:nth-child(5),
-.right-side label:nth-child(7),
-.right-side label:nth-child(9) {
-  background-color: #2ea44f;
-  padding: 8px 12px;
-  border-radius: 6px;
-  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
-  border: 1px solid #eee;
-}
+
 
 
 
@@ -544,7 +584,7 @@ button {
   vertical-align: middle;
   white-space: nowrap;
   margin: 10px;
-  margin-top: 480px;
+  margin-top: 60spx;
 }
 
 
@@ -594,7 +634,7 @@ h1 {
 .box-house label {
   font-size: 20px;
   font-weight: bold;
-  margin: 8px;
+  margin-bottom: -2px;
 }
 
     input {
@@ -605,7 +645,7 @@ h1 {
   margin-bottom: 10px;
   margin: 10px;
   text-align: center;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 
@@ -686,6 +726,29 @@ td {
   background-color: rgb(219, 186, 186)
 }
 
+
+.back-button {
+  position: absolute;
+  top: 150px;
+  left: 10px; /* 10px Abstand vom rechten Rand */
+  background-color: #22bc1a;
+  color: white; /* Textfarbe auf Weiß setzen */
+  border: none; /* Keine Rand */
+  border-radius: 5px; /* Abrunde Ecken */
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  padding: 10px 20px; /* 10px oben/unten, 20px links/rechts Innenabstand */
+  font-size: 16px; /* Schriftgröße anpassen */
+  transition: background-color 0.3s; /* Sanfter Übergang für die Hintergrundfarbe */
+}
+
+/* Hinzufügen eines Hover-Effekts */
+.back-button:hover {
+  background-color: #7d861c; /* Dunklere Hintergrundfarbe im Hover-Zustand */
+}
 
 
 

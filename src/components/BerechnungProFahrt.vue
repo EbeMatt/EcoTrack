@@ -15,7 +15,7 @@
         <!-- Buttons für jede Anzahl von Fahrten pro Woche -->
         <div v-for="days in [1, 2, 3, 4, 5, 6, 7]" :key="days">
           <p>{{ days }} x pro Woche</p>
-          <button @click="calculateSavings(days)">Berechnen</button>
+          <button @click="selectedDays = days; calculateSavings()">Berechnen</button>
         </div>
       </div>
       <div class="result">
@@ -30,6 +30,11 @@
   </template>
   
   <script>
+
+import { parseToken } from './tokenUtils';
+import axios from 'axios';
+
+
   export default {
     props: ['consumption', 'selectedFuel'],
     name: 'BerechnungProFahrt',
@@ -38,32 +43,55 @@
       distanceToWork: null,
       fuelCost: null,
       co2Constants: {
-        // Hier deine CO2-Konstanten für verschiedene Kraftstoffarten einfügen
+        
         benzin: 2.37,
         diesel: 2.65,
-        // ...
+        
       },
       co2Savings: null,
       moneySavings: null,
+      
     };
     },
     methods: {
-        calculateSavings(days) {
-      if (!this.distanceToWork || !this.fuelCost || !this.consumption) {
-        return;
-      }
+  async calculateSavings() {
+    const token = localStorage.getItem('token');
+    const decodedToken = parseToken(token);
 
-      const distance = parseFloat(this.distanceToWork) * 2;
-      const co2PerKm = (this.consumption / 100) * this.co2Constants[this.selectedFuel];
-      const co2Savings = co2PerKm * distance * days;
+    if (!this.distanceToWork || !this.fuelCost || !this.consumption) {
+      return;
+    }
 
-      // Annahme: Einsparung von 0.1 EUR pro gefahrenem Kilometer
-      const moneySavings = distance * 0.1 * days;
+    const distance = parseFloat(this.distanceToWork) * 2;
+    const co2PerKm = (this.consumption / 100) * this.co2Constants[this.selectedFuel];
+    const co2Savings = co2PerKm * distance * this.selectedDays;
+    const moneySavings = distance * 0.1 * this.selectedDays;
 
-      // Aktualisiere die Daten in der Komponente
-      this.co2Savings = co2Savings.toFixed(2);
-      this.moneySavings = moneySavings.toFixed(2);
-    },
+    // Aktualisiere die Daten in der Komponente
+    this.co2Savings = co2Savings.toFixed(2);
+    this.moneySavings = moneySavings.toFixed(2);
+
+    const startWeek = new Date();
+    startWeek.setHours(0, 0, 0, 0);
+    startWeek.setDate(startWeek.getDate() - startWeek.getDay() + 1);
+
+    const calculateSavingData = {
+      userId: decodedToken.id,
+      days: this.selectedDays,
+      co2_savings: this.co2Savings,
+      money_savings: this.moneySavings,
+      week_start_date: startWeek.toISOString()
+    };
+
+    axios
+      .post('http://localhost:3000/saveSavingData', calculateSavingData)
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
+  },
 
     // ... (weitere Methoden) ...
   },

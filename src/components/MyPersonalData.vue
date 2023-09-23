@@ -1,9 +1,10 @@
 <template>
     <div class="container-personaldata">
-      <img class="person-image" src="../assets/Person.png" alt="">
-      <h1>Persönliche Daten</h1>
+      <div>
+        <NavBar />
+      </div>
+      
       <div class="box-field">
-        <h4 @click="closePersonalData">X</h4>
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" placeholder="Name" autocomplete="off">
         <label for="birthday">Geburtstag:</label>
@@ -20,8 +21,10 @@
          <input type="text" name="work" id="work" placeholder="Arbeit">
 
          <button class="save-button" @click="saveData()">Speichern</button>
+         
 
     </div>
+    <button class="back-button" @click="closePersonalData">Zurück zu Meine Daten</button>
 
 </div>
 
@@ -33,9 +36,13 @@
 <script>
 import axios from 'axios';
 import { parseToken } from './tokenUtils';
+import NavBar from './NavBar.vue';
 
 export default {
   name: 'MyPersonalData',
+  components: {
+    NavBar,
+  },
   methods: {
     closePersonalData() {
       this.$emit('closePersonalData');
@@ -56,6 +63,11 @@ export default {
       })
       .then(function (response) {
         console.log(response);
+        if(response.data.success) {
+          alert('Erfolgreich gespeichert');
+        } else {
+          alert(response.data.message);
+        }
       })
       .catch(function (error) {
         console.log(error);
@@ -80,18 +92,6 @@ body {
   width: 100%;
 }
 
-.person-image {
-  position: absolute;
-  width: 28%;
-  height: auto;
-  left: 50px;
-  border: none;
-  
-}
-
-
-
-
 .container-personaldata {
   position: fixed;
   top: 0;
@@ -103,20 +103,10 @@ body {
   justify-content: center;
   align-items: center;
   z-index: 9999; 
-  background: #4b7432;
+  background-image: url('../assets/Background13.png');
     }
 
-.box-field h4 {
-    position: absolute;
-    color: black;
-    top: 170px;
-    right: 580px;
-}
-
-.box-field h4:hover {
-    color: rgb(39, 28, 28);
-    cursor: pointer;
-}
+  
 
 
 .box-field {
@@ -126,34 +116,22 @@ body {
     justify-content: center;
     background: #3c3d42;
     background: linear-gradient(0deg, #f6f8e2 0%, #e0ddca 100%);
-    border: 5px outset black;
     padding: 10px;
     width: 30%;
     height: auto;
     border-radius: 10px;
+    margin-top: 100px;
 }
 
-.box-field input {
-  width: 300px;
-  height: 30px;
+.box-field input, .box-field select {
+  width: 100%; /* Ändere die Breite auf 100% */
+  max-width: 300px; /* Füge eine maximale Breite hinzu, um zu verhindern, dass sie zu breit werden */
+  height: 25px;
   border-radius: 5px;
-  border: 2px solid #2ea44f; /* Aktualisierte Border-Farbe */
-  margin-bottom: 10px;
+  border: 2px solid #2ea44f;
   margin: 10px;
   text-align: center;
-  font-size: 20px;
-}
-
-
-    .box-field select {
-  width: 300px;
-  height: 30px;
-  border-radius: 5px;
-  border: 2px solid #2ea44f; /* Aktualisierte Border-Farbe */
-  margin-bottom: 10px;
-  margin: 10px;
-  text-align: center;
-  font-size: 20px;
+  font-size: 16px;
 }
 
 
@@ -163,10 +141,13 @@ body {
         font-size: 20px;
         font-weight: bold;
         margin: 10px;
+        margin-bottom: -5px;
+        
     }
 
     .save-button {
-  width: 200px;
+  width: 100%; /* Ändere die Breite auf 100% */
+  max-width: 200px; /* Füge eine maximale Breite hinzu, um zu verhindern, dass er zu breit wird */
   appearance: none;
   background-color: #2ea44f;
   border: 1px solid rgba(27, 31, 35, .15);
@@ -175,7 +156,7 @@ body {
   box-sizing: border-box;
   color: #fff;
   cursor: pointer;
-  display: block; /* Ändere display auf block */
+  display: block;
   align-items: center;
   justify-content: center;
   font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
@@ -190,7 +171,7 @@ body {
   -webkit-user-select: none;
   touch-action: manipulation;
   white-space: nowrap;
-  margin: 0 auto; 
+  margin: 0 auto;
 }
 
 
@@ -220,12 +201,29 @@ body {
   box-shadow: rgba(20, 70, 32, .2) 0 1px 0 inset;
 }
 
-h1 {
-    border: 5px outset black;
+
+.back-button {
+  position: absolute;
+  top: 150px;
+  left: 10px; /* 10px Abstand vom rechten Rand */
+  background-color: #22bc1a;
+  color: white; /* Textfarbe auf Weiß setzen */
+  border: none; /* Keine Rand */
+  border-radius: 5px; /* Abrunde Ecken */
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  padding: 10px 20px; /* 10px oben/unten, 20px links/rechts Innenabstand */
+  font-size: 16px; /* Schriftgröße anpassen */
+  transition: background-color 0.3s; /* Sanfter Übergang für die Hintergrundfarbe */
 }
 
-
-
+/* Hinzufügen eines Hover-Effekts */
+.back-button:hover {
+  background-color: #7d861c; /* Dunklere Hintergrundfarbe im Hover-Zustand */
+}
 
 
 

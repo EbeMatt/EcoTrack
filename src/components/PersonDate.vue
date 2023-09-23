@@ -44,28 +44,31 @@ export default {
 <style scoped>
 .container {
   display: flex;
+  flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  height: 100%;
+  min-height: 100%; /* Verhindert, dass der Container kleiner wird als die Buttons */
   width: 15%;
   padding-top: 150px;
-  background: #4b4c52;
+  
   border-radius: 5px;
   padding: 20px;
   position: fixed;
   top: 0;
   left: 0;
+  overflow-y: auto; /* Fügt eine Scrollleiste hinzu, wenn die Buttons nicht auf den Bildschirm passen */
 }
 
 .button-group {
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start;
   align-items: flex-start;
+  margin-top: 150px;
 }
 
 button {
-  width: 180px;
+  width: 100%;
   appearance: none;
   background-color: #2ea44f;
   border: 1px solid rgba(27, 31, 35, .15);

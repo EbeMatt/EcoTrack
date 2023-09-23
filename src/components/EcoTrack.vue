@@ -39,19 +39,21 @@
                                     <label>Name</label>
                                   </div>
                                               <div class="txt_signUpCard">
-                                                <input id="emailRegister" type="email" required>
+                                                <input id="emailRegister" type="email" v-model="email" @input="validEmail" required>
                                                 <span></span>
+                                                <p v-if="emailInvalidMessage" :style="{ color: 'red'}">{{ emailInvalidMessage }}</p>
                                                 <label>Email</label>
                                               </div>
         <div class="txt_signUpCard">
-    <input id="passwordRegister" v-model="password" @input="validatePassword" type="password" required >
+          <input id="passwordRegister" v-model="password" @input="validatePassword" type="password" required>
     <span></span>
-    <p v-if="passwordErrorMessage && password !== ''" :style="{ color: 'red' }">{{ passwordErrorMessage }}</p>
+    <p v-if="passwordErrorMessage || password !== ''" :style="{ color: 'red' }">{{ passwordErrorMessage }}</p>
     <label>Password</label>
   </div>
         <div class="txt_signUpCard">
-          <input id="confirmRegister" type="password" required>
+          <input id="confirmRegister" v-model="passwordConfirmation" @input="validatePasswordMatch" type="password" required>
           <span></span>
+          <p v-if="passwordMatchError" :style="{ color: 'red' }">{{ passwordMatchError }}</p>
           <label>Confirm Password</label>
         </div>
         <input class="positionOfCheckbox" type="checkbox" v-model="checkboxChecked">
@@ -76,11 +78,15 @@ import axios from 'axios';
 export default {
   data() {
     return {
-      loginCardVisible: false,
-      signUpCardVisible: false,
-      checkboxChecked: false,
-      password: '',
-    };
+    loginCardVisible: false,
+    signUpCardVisible: false,
+    checkboxChecked: false,
+    password: '',
+    passwordConfirmation: '',
+    passwordErrorMessage: '', 
+    passwordMatchError: '', 
+    emailInvalidMessage: '',
+  };
   },
   methods: {
     openLoginCard() {
@@ -101,6 +107,7 @@ export default {
       this.checkboxChecked = !this.checkboxChecked;
     },
     validatePassword() {
+      console.log(this);
       const password = this.password;
       let errorMessage = '';
 
@@ -118,6 +125,23 @@ export default {
 
       this.passwordErrorMessage = errorMessage;
     },
+
+    validatePasswordMatch() {
+       if(this.password != this.passwordConfirmation) {
+        this.passwordMatchError = 'Diese Passwörter stimmen nicht überein.';
+       } else {
+        this.passwordMatchError = '';
+       }
+    },
+
+    validEmail() {
+      const email = this.email;
+         if (/^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/.test(email)) {
+            this.emailInvalidMessage = '';
+         } else {
+          this.emailInvalidMessage = 'Das enstpricht keiner gültigen Emailadresse!';
+         }
+    },
     
 
     submitClicked() {
@@ -127,6 +151,8 @@ export default {
       const email = document.getElementById("emailRegister").value;
       const confirmPw = document.getElementById("confirmRegister").value;
 
+      const vm = this;
+
       axios.post('http://localhost:3000/register', {
         name: name,
         password: password,
@@ -135,12 +161,39 @@ export default {
       })
       .then(function (response) {
         console.log(response);
+        if(response.data.success) {
+          alert(response.data.message);
+          vm.closeSignUpCard();   // greift auf this nicht in der if zu !!!!
+        } else {
+          alert(response.data.message);
+        }
       })
       .catch(function (error) {
         console.log(error);
       });
 
     },
+                         setCookie(cname, cvalue, exdays) {
+                      const d = new Date();
+                      d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+                      let expires = "expires="+ d.toUTCString();
+                      document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+                    },
+                     getCookie(cname) {
+                      let name = cname + "=";
+                      let decodedCookie = decodeURIComponent(document.cookie);
+                      let ca = decodedCookie.split(';');
+                      for(let i = 0; i <ca.length; i++) {
+                        let c = ca[i];
+                        while (c.charAt(0) == ' ') {
+                          c = c.substring(1);
+                        }
+                        if (c.indexOf(name) == 0) {
+                          return c.substring(name.length, c.length);
+                        }
+                      }
+                      return "";
+                    },
     submitLogin() {
 
       const name = document.getElementById("nameLogin").value;
@@ -154,7 +207,10 @@ export default {
       .then(function (response) {
         console.log(response);
         if(response.data.user_id > 0) {
+
           
+          vm.setCookie("token", response.data.token, 30);
+          vm.setCookie("userId", response.data.user_id, 30);
           localStorage.setItem('token', response.data.token);
           localStorage.setItem('userId', response.data.user_id);
 
@@ -172,6 +228,16 @@ export default {
     },
    },
   mounted() {
+
+    let token = this.getCookie("token");
+    let userId = this.getCookie("userId");
+
+    if (token && userId) {
+      localStorage.setItem('token', token);
+      localStorage.setItem('userId',userId);
+      this.$router.push('/home');// auf webseite navigieren!
+    }
+
     const loginLink = document.querySelector('.loginLink a');
     const signUpLink = document.querySelector('.signupLink a');
 
