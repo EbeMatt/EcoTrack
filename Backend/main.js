@@ -3,9 +3,12 @@ var mysql = require('mysql2');
 var sha512 = require('js-sha512').sha512;
 const util = require('util');
 const cors = require('cors');
+const randomstring = require('randomstring');
+const nodemailer = require('nodemailer');
+const bcrypt = require('bcrypt');
 
 const DB_USER =  "ecotrackapp";
-const DB_PW =  "Ironman1Ebenberger";
+const DB_PW =  "";
 const DB_NAME =  "ecotrackdb";
 const DB_SERVER =  "localhost";
 
@@ -49,6 +52,7 @@ app.post('/register', async (req, res) => {
   let email = req.body.email;
   let password = req.body.password;
   let confirmPassword = req.body.confirmPassword;
+  let accepted_rules = 1;
   // first check if user with given name already exists
   var result = await query('SELECT * FROM User WHERE name=\''+name+'\'');
   if (result.length > 0) {
@@ -62,7 +66,7 @@ app.post('/register', async (req, res) => {
   }
   else {
     // create new user
-    await query('INSERT into User (name, email, password) values (\''+name+'\', \''+email+'\', \''+sha512(password)+'\')');
+    await query('INSERT into User (name, email, password, accepted_rules) values (\''+name+'\', \''+email+'\', \''+sha512(password)+'\', \''+accepted_rules+'\')');
     
     // success!
     res.send({
@@ -402,6 +406,180 @@ app.get('/saveHouseData', async (req, res) => {
     });
   }
 });
+
+
+app.post('/saveTrashData', async (req, res) => {
+  console.log('saveTrashData called!');
+
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const userId = req.body.userId;
+  const selectedPaper = req.body.paper_Type;
+  const paperUsageAmount = req.body.paper_Usage;
+  const usageEstimate = req.body.usage_Type;
+  const plasticUsageAmount = req.body.plastic_Usage;
+  const paperUsagePerMonth = req.body.paper_usage_per_month;
+  const paperUsagePerYear = req.body.paper_usage_per_year;
+  const co2ImpactPerSheet = req.body.co2_impact_per_sheet;
+  const plasticUsagePerMonth = req.body.plastic_usage_per_month;
+  const plasticUsagePerYear = req.body.plastic_usage_per_year;
+  const co2ImpactPerKg = req.body.co2_impact_per_kg;
+
+  try {
+    const result = await query('SELECT * FROM trash WHERE UserID = ?', [userId]);
+
+    if (result.length > 0) {
+      await query('UPDATE trash SET paper_Type = ?, paper_Usage = ?, usage_Type = ?, plastic_Usage = ?, paper_usage_per_month = ?, paper_usage_per_year = ?, co2_impact_per_sheet = ?, plastic_usage_per_month = ?, plastic_usage_per_year = ?, co2_impact_per_kg = ? WHERE UserID = ?',
+        [selectedPaper, paperUsageAmount, usageEstimate, plasticUsageAmount,  paperUsagePerMonth, paperUsagePerYear, co2ImpactPerSheet, plasticUsagePerMonth, plasticUsagePerYear, co2ImpactPerKg, userId]);
+    } else {
+      await query('INSERT INTO trash (UserID, paper_Type, paper_Usage, usage_Type, paper_usage_per_month, paper_usage_per_year, co2_impact_per_sheet, plastic_Usage, plastic_usage_per_month, plastic_usage_per_year, co2_impact_per_kg) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [userId, selectedPaper, paperUsageAmount, usageEstimate, paperUsagePerMonth, paperUsagePerYear, co2ImpactPerSheet, plasticUsageAmount, plasticUsagePerMonth, plasticUsagePerYear, co2ImpactPerKg]);
+    }
+
+    res.send({
+      success: true,
+      message: null
+    });
+  } catch (error) {
+    console.error('Fehler beim Speichern der Daten', error);
+    res.status(500).send({
+      success: false,
+      message: 'Fehler beim Speichern der Daten'
+    });
+  }
+});
+
+app.get('/saveTrashData', async (req, res) => {
+  console.log('saveTrashData called!');
+
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const userId = req.query.userId;
+
+  try {
+    var result = await query('SELECT co2_impact_per_sheet, co2_impact_per_kg FROM trash WHERE UserID =?', [userId]);
+
+    res.send({
+      success: true,
+      data: result,
+    });
+  } catch (error) {
+    console.error('Fehler beim Abrufen der TrashDaten', error);
+    res.status(500).send({
+      success: false,
+      message: 'Fehler beim laden der Daten'
+    });
+  }
+});
+
+app.get('/resultC02', async (req, res) => {
+  console.log('ResultC02 ist called!');
+
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const userId = req.query.userId; // Verwenden Sie req.query statt req.body
+
+  try {
+    const cars = 'SELECT Co2Emission FROM cars WHERE userId = ?';
+    const house = 'SELECT co2_emissionHeat, co2_emission_electricity FROM house WHERE userId = ?';
+    const trash = 'SELECT co2_impact_per_sheet, co2_impact_per_kg FROM trash WHERE userId = ?';
+
+    const result = await Promise.all([
+      query(cars, [userId]),
+      query(house, [userId]),
+      query(trash, [userId])
+    ]);
+
+    const carsResult = result[0].map(item => parseFloat(item.Co2Emission));
+    const houseResult = result[1].map(item => parseFloat(item.co2_emissionHeat + item.co2_emission_electricity));
+    const trashResult = result[2].map(item => parseFloat(item.co2_impact_per_sheet + item.co2_impact_per_kg));
+
+    res.status(200).json({ carsResult, houseResult, trashResult }); // Senden Sie eine JSON-Antwort
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Daten', error);
+    res.status(500).json({
+      success: false,
+      message: 'Fehler beim Laden der Daten'
+    });
+  }
+});
+
+
+// Erstellt eine Email mit einem neuen Passwort und sendet diese dem User 
+app.post('/forgottPassword', async (req, res) => {
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const name = req.body.name;
+  const email = req.body.email;
+
+  try {
+    const user = await query('SELECT * FROM user WHERE name = ? AND email = ?', [name, email]);
+
+    if (user.length === 0) {
+      return res.status(404).json({ message: 'Benutzer nicht gefunden' });
+    }
+
+    function generateRandomPassword() {
+      const passwordLength = 12;
+      const randomPassword = randomstring.generate({
+        length: passwordLength,
+        charset: 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789' // Gültige Zeichen für das Passwort
+      });
+      return randomPassword;
+    }
+
+    const newPassword = generateRandomPassword();
+
+    // Hier können Sie das neue Passwort in die Datenbank speichern, nachdem Sie es gehasht haben
+    const newPasswordHash = await bcrypt.hash(newPassword, 10); // Hier wird das Passwort mit Bcrypt gehasht
+
+    // Update-Befehl, um das neue gehashte Passwort in der Datenbank zu speichern
+    await query('UPDATE user SET password = ? WHERE name = ? AND email = ?', [newPasswordHash, name, email]);
+
+    // E-Mail-Konfiguration
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmx.net',
+      port: 587, // oder 465 für SSL
+      secure: false, // true für SSL
+      auth: {
+        user: 'ecotrack@gmx.at', // Ihre E-Mail-Adresse
+        pass: 'Ebenberger12!' // Ihr E-Mail-Passwort
+      }
+    });
+
+    const mailOptions = {
+      from: 'ecotrack@gmx.at', // Absender
+      to: email, // Empfänger
+      subject: 'Ihr neues Passwort', // Betreff
+      text: `Ihr neues Passwort lautet: ${newPassword}` // Textinhalt der E-Mail
+    };
+
+    // E-Mail senden
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Fehler beim Senden der E-Mail:', error);
+        // Hier können Sie geeignete Maßnahmen ergreifen, wenn das Senden der E-Mail fehlschlägt
+        res.status(500).json({ message: 'Fehler beim Senden der E-Mail' });
+      } else {
+        console.log('E-Mail erfolgreich gesendet:', info.response);
+        // Hier können Sie geeignete Maßnahmen ergreifen, wenn die E-Mail erfolgreich gesendet wurde
+
+        // Erfolgreiche Antwort senden
+        res.json({ message: 'Neues Passwort wurde generiert und gespeichert.' });
+      }
+    });
+  } catch (error) {
+    console.error('Fehler beim Zurücksetzen des Passworts:', error);
+    res.status(500).json({ message: 'Fehler beim Zurücksetzen des Passworts' });
+  }
+});
+
+
+
 
 
 

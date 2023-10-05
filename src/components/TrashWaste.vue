@@ -99,6 +99,8 @@
 <script>
 
 import NavBar from './NavBar.vue';
+import { parseToken } from './tokenUtils';
+import axios from 'axios';
 
 
 export default {
@@ -111,9 +113,9 @@ export default {
       trash: 'Bei mir wird alles getrennt',
       wasteKg: 'durchschnitt',
       selectedPaper: 'freshFiber', // Default to Frischfaser-Papier
-      paperUsageAmountsageAmount: 0,
+      paperUsageAmount: null,
       usageEstimate: 'average',
-      plasticUsageAmount: 0, // Default to Durchschnitt
+      plasticUsageAmount: null, // Default to Durchschnitt
       plasticCO2: 0,
       dataSaved: false, // Flag to track if data has been saved
     };
@@ -153,23 +155,68 @@ export default {
           break;
       }
     },
-    saveDataTrash() {
+    async saveDataTrash() {
       if (this.dataSaved) {
-        // Wenn bereits Daten gespeichert wurden, zeige eine Bestätigungsdialogbox an
+        // Check if data has already been saved and confirm overwriting
         const confirmResult = window.confirm('Sie haben bereits Werte eingegeben. Möchten Sie diese wirklich ersetzen?');
         if (!confirmResult) {
-          // Wenn der Benutzer "Abbrechen" auswählt, beende die Funktion ohne weitere Aktion
+          // If the user cancels, exit the function without further action
           return;
         }
       }
 
-      // Set the dataSaved flag to true to display the table
-      this.dataSaved = true;
+      // Data validation: Check if paper and plastic usage are valid numbers
+      if (!this.isNumeric(this.paperUsageAmount) || this.paperUsageAmount < 0 || !this.isNumeric(this.plasticUsageAmount) || this.plasticUsageAmount < 0) {
+        alert('Bitte geben Sie gültige Werte für den Papier- und Plastikverbrauch ein.');
+        return;
+      }
+
+      const token = localStorage.getItem('token');
+      const decodedToken = parseToken(token);
+
+      try {
+        // Berechne die Werte hier, nachdem die Validierung bestanden wurde
+        const co2ImpactPerSheet = this.calculateCO2Impact;
+        const paperUsagePerYear = this.usageAmountYear;
+        const plasticUsagePerYear = this.calculatePlasticUsageAmountYear;
+        const co2ImpactPerKg = this.calculatePlasticCO2Impact;
+
+
+        const trashData = {
+                  userId: decodedToken.id,
+                  paper_Type: this.selectedPaper,  // Statt 'selectedPaper'
+                  paper_Usage: this.paperUsageAmount,  // Statt 'paperUsageAmount'
+                  usage_Type: this.usageEstimate,  // Statt 'usageEstimate'
+                  paper_usage_per_month: this.paperUsageAmount,  // Statt 'paperUsageAmount'
+                  paper_usage_per_year: paperUsagePerYear,
+                  co2_impact_per_sheet: co2ImpactPerSheet,
+                  plastic_Usage: this.plasticUsageAmount,  // Statt 'plasticUsageAmount'
+                  plastic_usage_per_month: this.plasticUsageAmount,  // Statt 'plasticUsageAmount'
+                  plastic_usage_per_year: plasticUsagePerYear,
+                  co2_impact_per_kg: co2ImpactPerKg,
+                };
+
+        // Send the data to the server
+        const response = await axios.post('http://localhost:3000/saveTrashData', trashData);
+        console.log(response.data);
+
+        // Set the dataSaved flag to true to display the table
+        this.dataSaved = true;
+      } catch (error) {
+        console.error('Fehler beim Speichern der Daten:', error);
+        // Handle errors here
+        alert('Fehler beim Speichern der Daten. Bitte versuchen Sie es später erneut.');
+      }
+    },
+
+    isNumeric(value) {
+      return !isNaN(parseFloat(value)) && isFinite(value);
     },
     closeTrashWaste() {
       this.$emit('closeTrashWaste');
     },
   },
+
   computed: {
     calculateCO2Impact() {
       let co2PerSheet = 0; // CO2-Auswirkungen pro Blatt
@@ -180,23 +227,25 @@ export default {
       } else if (this.selectedPaper === 'normalPaper') {
         co2PerSheet = 1000 / 16; // 1,000 g CO2 für normales Papier, geteilt durch 16 Seiten
       }
-      return co2PerSheet * this.usageAmount;
+      return co2PerSheet * this.paperUsageAmount; // Verwende paperUsageAmount hier
     },
+
     usageAmountYear() {
       // Annahme: Ein Jahr hat 12 Monate
-      return this.usageAmount * 12;
+      return this.paperUsageAmount * 12;
     },
-    calculatePlasticCO2Impact() {
-  // CO2-Berechnung für Plastik
-  const plasticCO2PerKg = 5 * 1000; // 5 Tonnen CO2 pro Tonne Plastik, umgerechnet in g
-  const plasticCO2 = (this.plasticUsageAmount * plasticCO2PerKg) / 12; // Monatlicher Verbrauch umgerechnet
 
-  return plasticCO2;// Ergebnis pro Monat
-},
-calculatePlasticUsageAmountYear() {
-    // Annahme: Ein Jahr hat 12 Monate
-    return this.plasticUsageAmount * 12;
-  },
+    calculatePlasticCO2Impact() {
+      // CO2-Berechnung für Plastik
+      const plasticCO2PerKg = 5 * 1000; // 5 Tonnen CO2 pro Tonne Plastik, umgerechnet in g
+      const plasticCO2 = (this.plasticUsageAmount * plasticCO2PerKg) / 12; // Monatlicher Verbrauch umgerechnet
+      return plasticCO2; // Ergebnis pro Monat
+    },
+
+    calculatePlasticUsageAmountYear() {
+      // Annahme: Ein Jahr hat 12 Monate
+      return this.plasticUsageAmount * 12;
+    },
   },
 };
 </script>

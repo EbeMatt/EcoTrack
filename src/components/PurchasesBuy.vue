@@ -1,68 +1,131 @@
 <template>
 
-<div class="container-purchases">
-    <img class="purchases-image" src="../assets/Purchases.png" >
-    <h1>Einkäufe</h1>
+  <div class="container-purchases">
+
     <div class="box-purchases">
-        <h4 @click="$emit('closePurchasesBuy')">X</h4>
-        <label for="buyOnline">Kaufen Sie viel Online?</label>
-        <select class="option-style" name="buyOnline" id="buyOnline">
-            <option value="yes">Ja</option>
-            <option value="no">Nein</option>
+      
+      <label for="buyOnline">Kaufen Sie viel Online?</label>
+      <select class="option-style" name="buyOnline" id="buyOnline" v-model="buyOnline">
+        <option value="yes">Ja</option>
+        <option value="no">Nein</option>
+      </select>
+      <div v-if="buyOnline === 'yes'">
+        <label for="distance">Entfernung zum Paketzentrum (km):</label>
+        <input type="number" id="distance" min="0" v-model="distance" @input="calculateCO2Emissions">
+        <label for="weight">Gewicht des Pakets (g):</label>
+        <input type="number" id="weight" min="0" v-model="weight" @input="calculateCO2Emissions">
+        <label for="origin">Herkunft des Pakets:</label>
+        <select class="option-style" name="origin" id="origin" v-model="origin" @change="calculateCO2Emissions">
+          <option value="china">China</option>
+          <option value="usa">USA</option>
+          <!-- Weitere Länder hinzufügen -->
         </select>
-        <label for="secondHand">Kaufen Sie Secondhandware?</label>
-        <select class="option-style" name="secondHand" id="secondHand">
-            <option value="yes">Ja</option>
-            <option value="no">Nein</option>
-            <option value="sometimes">ganz wenig</option>
+        <label for="destination">Ziel des Pakets:</label>
+        <select class="option-style" name="destination" id="destination" v-model="destination" @change="calculateCO2Emissions">
+          <option value="germany">Deutschland</option>
+          <option value="austria">Österreich</option>
+          <!-- Weitere Länder hinzufügen -->
         </select>
-        <label for="paper">Achten Sie auf Ihren Papierverbrauch?</label>
-        <input type="range" id="paper" min="0" max="75" step="25" list="paper-options" @input="scalaPaperHandler">
-        <datalist id="paper-options">
-          <option value="0">Garnicht</option>
-          <option value="25">Durchschnitt (220kg/Jahr)</option>
-          <option value="50">reduziert</option>
-          <option value="75">bewusst reduziert</option>
-        </datalist>
-        <p class="selected-option">{{ paper }}</p><br>
-        <button class="save-button">Speichern</button>
+        <label for="estimatedDistance">Geschätze zurückgelegte Entfernung des Paketes:</label>
+        <input type="number" name="estimatedDistance" id="estimatedDistance" min="0" v-model="estimatedDistance" @input="calculateCO2Emissions">
+        <label for="transportMethod">Transportmethode:</label>
+        <select class="option-style" name="transportMethod" id="transportMethod" v-model="transportMethod" @change="calculateCO2Emissions">
+          <option value="ship">Schiff</option>
+          <option value="plane">Flugzeug</option>
+          <option value="car">Auto</option>
+        </select>
+        <label for="countPaket">Wieviel pakete bestellen Sie pro Monat ca?</label>
+        <input type="number" id="countPaket" min="0" name="countPaket" v-model="countPaket" @input="calculateCO2Emissions">
+      </div>
+      <div v-else>
+        <label for="customerDistance">Entfernung zum Geschäft (km):</label>
+        <input type="number" id="customerDistance" v-model="customerDistance" @input="calculateCO2Emissions">
+        <label for="distance">Entfernung zum Paketzentrum (km):</label>
+        <input type="number" id="distance" min="0" v-model="distance" @input="calculateCO2Emissions">
+      </div>
+      <p class="selected-option">{{ co2Emissions }}</p><br>
+      <button class="save-button">Speichern</button>
 
     </div>
+    <button class="back-button" @click="closePurchasesBuy">Zurück zu Meine Daten</button>
 
-</div>
+  </div>
 </template>
 
 <script>
 
 export default {
-    name: 'PurchasesBuy',
-    data() {
-        return {
-            paper: 'Durchschnitt (220kg/Jahr)',
-        };
+  name: 'PurchasesBuy',
+  data() {
+    return {
+      buyOnline: 'yes',
+      distance: 5,
+      weight: 1000, // Annahme: Standardgewicht 1 kg
+      origin: 'china',
+      destination: 'germany',
+      transportMethod: 'ship', // Standard: Schiff
+      carDistance: 0,
+      customerDistance: 5,
+      co2Emissions: '',
+      packaging: 50,
+      countPaket: '',
+      estimatedDistance: '',
+    };
+  },
+  
+  methods: {
+    calculateCO2Emissions() {
+      console.log('calculateCO2Emissions called');
+  let totalEmissions = 0;
+  let deliveryEmissions = 0;
+
+  if (this.buyOnline === 'yes') {
+    // Berechnung der CO2-Emissionen für Online-Einkäufe
+    
+
+    if (this.transportMethod === 'ship') {
+      deliveryEmissions = this.distance * 0.0151;
+    } else if (this.transportMethod === 'plane') {
+      deliveryEmissions = this.distance * 0.1;
+    } else if (this.transportMethod === 'car') {
+      deliveryEmissions = this.carDistance * 0.12;
+    }
+
+    const packagingEmissions = this.packaging;
+    const weightEmissions = this.weight * 0.0025;
+
+    totalEmissions = (deliveryEmissions + packagingEmissions + weightEmissions);
+
+  } else {
+    // Berechnung der CO2-Emissionen für Einkäufe im Geschäft
+    const customerEmissions = this.customerDistance * 400;
+
+    totalEmissions = customerEmissions + 4400; // Feste Emissionen für Geschäftseinkäufe
+  }
+
+  // berechnung für estimatedDistance
+
+  const estimatedDistance = parseFloat(this.estimatedDistance);
+  console.log('estimatedDistance:', estimatedDistance);
+
+  if(estimatedDistance >= 0) {
+    totalEmissions += estimatedDistance * deliveryEmissions; // ändern auf die Art des Transport
+  }
+
+  const countPaket = parseFloat(this.countPaket);
+  console.log('countPaket:', countPaket);
+  
+  if (countPaket >= 0) {
+  totalEmissions *= countPaket; // Multipliziere die Emissionen mit countPaket
+}
+  console.log('totalEmissions:', totalEmissions);
+
+  this.co2Emissions = `${totalEmissions.toFixed(2)} - ${(totalEmissions + 1000).toFixed(2)} Gramm CO2-Äquivalente`;
+},
+closePurchasesBuy() {
+      this.$emit('closePurchasesBuy');
     },
-    methods: {
-        scalaPaperHandler(event) {
-            const value = event.target.value;
-            switch (value) {
-                case '0':
-                    this.paper = 'Garnicht';
-                    break;
-                case '25':
-                    this.paper = 'Durchschnitt (220kg/Jahr)';
-                    break;
-                case '50':
-                    this.paper = 'reduziert';
-                    break;
-                case '75':
-                    this.paper = 'bewusst reduziert';
-                    break;
-            }
-        },
-        closePurchasesBuy() {
-            this.$emit('closePurchasesBuy');
-        },
-    },
+  },
 };
 
 </script>
@@ -81,18 +144,6 @@ body {
   padding: 0;
   box-sizing: border-box;
   width: 100%;
- 
-  
-}
-
-.purchases-image {
-  position: absolute;
-  top: 20%;
-  width: 30%;
-  height: auto;
-  left: 50px;
-  border: none;
-  
 }
 
 .container-purchases {
@@ -103,240 +154,142 @@ body {
   height: 100vh; 
   display: flex;
   flex-direction: column;
-  justify-content: flex-start; 
+  justify-content: center; 
   align-items: center;
   z-index: 9999;
-  background: #4b7432;
+  background-image: url('../assets/Background13.png');
   overflow: auto;
-  padding-top: 80px; 
+  padding-top: 50px; 
 }
 
 
     .box-purchases {
-    display: flex;
+      display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     background: #3c3d42;
     background: linear-gradient(0deg, #f6f8e2 0%, #e0ddca 100%);
-    border: 5px outset black;
-    padding: 2px;
+    padding: 10px;
     width: 30%;
     height: auto;
-    border-radius: 10px;             
+    border-radius: 10px;
+    margin: 80px auto;           
 }
 
 
 
 button {
-        align-items: center;
+  width: 200px;
+  height: 50px;
   appearance: none;
-  background-color: #FCFCFD;
-  border-radius: 4px;
-  border-width: 0;
-  box-shadow: rgba(45, 35, 66, 0.4) 0 2px 4px,rgba(45, 35, 66, 0.3) 0 7px 13px -3px,#D6D6E7 0 -3px 0 inset;
+  background-color: #2ea44f;
+  border: 1px solid rgba(27, 31, 35, .15);
+  border-radius: 6px;
+  box-shadow: rgba(27, 31, 35, .1) 0 1px 0;
   box-sizing: border-box;
-  color: #36395A;
+  color: #fff;
   cursor: pointer;
-  display: inline-flex;
-  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
-  height: 48px;
+  display: flex;
+  align-items: center;
   justify-content: center;
-  line-height: 1;
-  list-style: none;
-  overflow: hidden;
-  padding-left: 16px;
-  padding-right: 16px;
+  font-family: -apple-system,system-ui,"Segoe UI",Helvetica,Arial,sans-serif,"Apple Color Emoji","Segoe UI Emoji";
+  font-size: 18px;
+  font-weight: 600;
+  line-height: 20px;
+  padding: 6px 16px;
   position: relative;
-  text-align: left;
+  text-align: center;
   text-decoration: none;
-  transition: box-shadow .15s,transform .15s;
   user-select: none;
   -webkit-user-select: none;
   touch-action: manipulation;
+  vertical-align: middle;
   white-space: nowrap;
-  will-change: box-shadow,transform;
-  font-size: 18px;
-    }
+  margin: 10px;
+  margin-top: 60spx;
+}
 
-button:focus {
-  box-shadow: #D6D6E7 0 0 0 1.5px inset, rgba(45, 35, 66, 0.4) 0 2px 4px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
+
+
+button:focus:not(:focus-visible):not(.focus-visible) {
+  box-shadow: none;
+  outline: none;
 }
 
 button:hover {
-  box-shadow: rgba(45, 35, 66, 0.4) 0 4px 8px, rgba(45, 35, 66, 0.3) 0 7px 13px -3px, #D6D6E7 0 -3px 0 inset;
-  transform: translateY(-2px);
+  background-color: #2c974b;
+}
+
+button:focus {
+  box-shadow: rgba(46, 164, 79, .4) 0 0 0 3px;
+  outline: none;
+}
+
+button:disabled {
+  background-color: #94d3a2;
+  border-color: rgba(27, 31, 35, .1);
+  color: rgba(255, 255, 255, .8);
+  cursor: default;
 }
 
 button:active {
-  box-shadow: #D6D6E7 0 3px 7px inset;
-  transform: translateY(2px);
-}
-
-h1 {
-    border: 5px outset black;
-}
-
-.box-purchases h4 {
-    position: absolute;
-    color: black;
-    top: 140px;
-    right: 560px;
-}
-
-.box-purchases h4:hover {
-    color: rgb(39, 28, 28);
-    cursor: pointer;
+  background-color: #298e46;
+  box-shadow: rgba(20, 70, 32, .2) 0 1px 0 inset;
 }
 
 .box-purchases label {
-        font-size: 18px;
-        font-weight: bold;
-        margin: 8px;
-    }
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px; /* Abstand unter dem Label */
+  display: block; /* Ändert die Anzeige von Inline zu Block, um die Labels unter den Inputs zu positionieren */
+  text-align: center; /* Zentriert den Text horizontal */
+}
 
-    input[type=range] {
+input {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+select {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.box-purchases input,
+.box-purchases select {
+  width: 100%;
+  max-width: 300px;
   height: 25px;
-  -webkit-appearance: none;
-  appearance: none;
-  margin: 10px 0;
-  width: 100%;
-}
-input[type=range]:focus {
-  outline: none;
-}
-input[type=range]::-webkit-slider-runnable-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
- 
-  box-shadow: 1px 1px 1px #000000;
-  background: #a9e2f5;
   border-radius: 5px;
-  border: 1px solid #000000;
-}
-input[type=range]::-webkit-slider-thumb {
-  box-shadow: 1px 1px 1px #000000;
-  border: 1px solid #000000;
-  height: 25px;
-  width: 15px;
-  border-radius: 5px;
-  background: #FFFFFF;
-  cursor: pointer;
-  -webkit-appearance: none;
-  margin-top: -11px;
-}
-input[type=range]:focus::-webkit-slider-runnable-track {
-  background: #a9e2f5;
-}
-input[type=range]::-moz-range-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
-  
-  box-shadow: 1px 1px 1px #000000;
-  background: #a9e2f5;
-  border-radius: 5px;
-  border: 1px solid #000000;
-}
-input[type=range]::-moz-range-thumb {
-  box-shadow: 1px 1px 1px #000000;
-  border: 1px solid #000000;
-  height: 20px;
-  width: 15px;
-  border-radius: 5px;
-  background: #FFFFFF;
-  cursor: pointer;
-}
-input[type=range]::-ms-track {
-  width: 100%;
-  height: 10px;
-  cursor: pointer;
-  
-  background: transparent;
-  border-color: transparent;
-  color: transparent;
-}
-input[type=range]::-ms-fill-lower {
-  background: #a9e2f5;
-  border: 1px solid #000000;
-  border-radius: 10px;
-  box-shadow: 1px 1px 1px #000000;
-}
-input[type=range]::-ms-fill-upper {
-  background: #a9e2f5;
-  border: 1px solid #000000;
-  border-radius: 10px;
-  box-shadow: 1px 1px 1px #000000;
-}
-input[type=range]::-ms-thumb {
-  margin-top: 1px;
-  box-shadow: 1px 1px 1px #000000;
-  border: 1px solid #000000;
-  height: 20px;
-  width: 15px;
-  border-radius: 5px;
-  background: #FFFFFF;
-  cursor: pointer;
-}
-input[type=range]:focus::-ms-fill-lower {
-  background: #a9e2f5;
-}
-input[type=range]:focus::-ms-fill-upper {
-  background: #a9e2f5;
+  border: 2px solid #2ea44f;
+  margin: 10px auto; /* Auto-Margin links und rechts, um die Inputs zu zentrieren */
+  text-align: center;
+  font-size: 16px;
 }
 
-
-
-.option-style {
-    justify-content: center;
-    text-align: center;
-      width: 200px;
-      height: 20px;
-      border: none;
-      font-size: 14px;
-      color: #38b4d0;
-      background-color: #eee;
-      border-radius: 5px;
-      box-shadow: 4px 4px #ccc;
-      }
-
-
-      input[type="checkbox"] {
-  position: relative;
-  width: 40px;
-  height: 15px;
-  -webkit-appearance: none;
-  appearance: none;
-  background: #c6c6c6;
-  outline: none;
-  border-radius: 20px;
-  box-shadow: inset 0 0 5px rgba(0, 0, 0, .2);
-  transition: .5s;
-}
-
-input[type="checkbox"]::before {
-  content: '';
+    .back-button {
   position: absolute;
-  width: 20px;
-  height: 20px;
-  border-radius: 20px;
-  top: -2.5px;
-  left: -2.5px;
-  background: #fac7c3;
-  transition: .5s;
+  top: 150px;
+  left: 10px; /* 10px Abstand vom rechten Rand */
+  background-color: #22bc1a;
+  color: white; /* Textfarbe auf Weiß setzen */
+  border: none; /* Keine Rand */
+  border-radius: 5px; /* Abrunde Ecken */
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  padding: 10px 20px; /* 10px oben/unten, 20px links/rechts Innenabstand */
+  font-size: 16px; /* Schriftgröße anpassen */
+  transition: background-color 0.3s; /* Sanfter Übergang für die Hintergrundfarbe */
 }
 
-input:checked[type="checkbox"] {
-  background: #38b4d0;
+/* Hinzufügen eines Hover-Effekts */
+.back-button:hover {
+  background-color: #7d861c; /* Dunklere Hintergrundfarbe im Hover-Zustand */
 }
-
-input:checked[type="checkbox"]::before {
-  top: -2.5px;
-  left: 20px;
-  background-color: #fac7c3;
-  transition: .5s;
-}
-
 
 </style>

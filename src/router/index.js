@@ -21,6 +21,8 @@ import DashboardResult from'@/components/DashboardResult';
 import HeaderBerechnungProFahrt from '@/components/HeaderBerechnungProFahrt';
 import BerechnungsGrundlageFahrzeug from '@/components/BerechnungsGrundlageFahrzeug.vue';
 import SloganEcotrack from '@/components/SloganEcotrack.vue';
+import DataRights from '@/components/DataRights.vue';
+import ForgottPassword from '@/components/ForgottPassword.vue';
 
 
 
@@ -135,7 +137,18 @@ const routes = [
       name: 'SloganEcotrack',
       path: '/sloganecotrack',
       component: SloganEcotrack
-    }
+    },
+    {
+      name: 'DataRights',
+      path: '/datarights',
+      component: DataRights
+    },
+    {
+      name: 'ForgottPasword',
+      path: '/forgottpassword',
+      component: ForgottPassword
+
+    },
   ];
 
 

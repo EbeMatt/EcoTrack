@@ -8,6 +8,7 @@
                                           <button class="btn-frontPage" @click="openLoginCard">Login</button>
                                                   <button class="btn-frontPage" @click="openSignUpCard">Sign Up</button>
                                                    </div>
+                                                   
       <p>Created by Ebenberger Matthias</p>
 
                  <div class="loginCard" :style="{ display: loginCardVisible ? 'block' : 'none' }">
@@ -24,7 +25,9 @@
                                                      <span></span>
                                                      <label>Password</label>
                                                    </div>
-                                    <div class="pass">Password vergessen?</div>
+                                                   <div class="pass">
+                                                   <router-link to="/forgottpassword">Password vergessen?</router-link>
+                                                  </div>
                                     <input class="btn-Logincard" type="submit" @click="submitLogin()" value="Login">
                                     <div class="signupLink">Registrieren? <a href="#">Sign Up</a></div>
                                   </div>
@@ -57,11 +60,12 @@
           <label>Confirm Password</label>
         </div>
         <input class="positionOfCheckbox" type="checkbox" v-model="checkboxChecked">
-        <p>Ich akzeptiere die <strong>Richtlinien</strong> dieser Firma.</p>
+        <router-link to="/datarights">Ich akzeptiere die <strong><a> Richtlinien</a></strong> dieser Firma.</router-link>
         <input class="btn-signUpCard" type="submit" @click="submitClicked()" value="Sign Up" :disabled="!checkboxChecked">
         <div class="loginLink">Sie haben schon einen Account? <a href="#">Login</a></div>
       </div>
     </div>
+    <i @click="openMail()" class='bx bx-envelope bx-flip-horizontal' ></i>
   </div>
 </template>
 
@@ -72,6 +76,7 @@
 <script>
 
 import axios from 'axios';
+import CryptoJS from 'crypto-js';
 
 
 
@@ -142,6 +147,11 @@ export default {
           this.emailInvalidMessage = 'Das enstpricht keiner gültigen Emailadresse!';
          }
     },
+    openMail() {
+      window.open('mailto:matthias.ebenberger@gmx.at.');
+    },
+
+    
     
 
     submitClicked() {
@@ -149,15 +159,16 @@ export default {
       const name = document.getElementById("nameRegister").value;
       const password = document.getElementById("passwordRegister").value;
       const email = document.getElementById("emailRegister").value;
-      const confirmPw = document.getElementById("confirmRegister").value;
-
+      const confirmPw = CryptoJS.SHA256(document.getElementById("confirmRegister").value).toString(CryptoJS.enc.Hex);
+      const hashedPassword = CryptoJS.SHA256(password).toString(CryptoJS.enc.Hex);
       const vm = this;
 
       axios.post('http://localhost:3000/register', {
         name: name,
-        password: password,
+        password: hashedPassword,
         email: email,
         confirmPw: confirmPw,
+        accepted_rules: vm.checkboxChecked,
       })
       .then(function (response) {
         console.log(response);
@@ -259,6 +270,8 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped>
+
+
 body {
     
     margin: 0;
@@ -647,6 +660,7 @@ p {
   touch-action: manipulation;
   white-space: nowrap;
   margin: 0 auto; 
+  margin-top: 5px;
 }
 
 
@@ -691,8 +705,24 @@ p {
     left: 10%;
 }
 
+
+
 .signUpCard p {
     font-size: 12px;
+}
+
+a {
+  color: black;
+   
+}
+
+i {
+  position: fixed;
+  bottom: 20px;
+  right: 40px;
+  font-size: 45px; 
+  color: rgb(60, 202, 60);
+  cursor: pointer;
 }
 
 </style>

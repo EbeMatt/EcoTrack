@@ -2,6 +2,9 @@
   <div> 
     <NavBar />
   </div>
+  <div>
+    <SloganEcotrack />
+  </div>
  
 
     <div class="information-container">
@@ -22,6 +25,7 @@
 <script>
 
 import NavBar from './NavBar.vue';
+import SloganEcotrack from './SloganEcotrack.vue';
 
 
 
@@ -30,6 +34,7 @@ export default {
   name: 'HomeView',
   components: {
     NavBar,
+    SloganEcotrack,
     
   },
   

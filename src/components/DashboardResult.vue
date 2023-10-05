@@ -48,20 +48,26 @@
           <i class="fas fa-trash"></i>
         </div>
         <div class="card-body">
-          <canvas id="waste-chart"></canvas>
+          <canvas id="chartTrashData"></canvas>
         </div>
       </div>
     </div>
 
     <div class="charts-container">
-      <div class="chart">
-        <canvas id="chart1"></canvas>
-      </div>
-      <div class="chart">
-        <canvas id="chart2"></canvas>
-      </div>
-    </div>
+  <div class="chart">
+    <canvas id="resultChartCars" class="small-canvas"></canvas>
   </div>
+  <div class="chart">
+    <canvas id="resultChartHouse" class="small-canvas"></canvas>
+  </div>
+  <div class="chart">
+    <canvas id="resultChartTrash" class="small-canvas"></canvas>
+  </div>
+  <div class="chart">
+    <canvas id="resultChartC02" class="small-canvas"></canvas>
+  </div>
+</div>
+</div>
 </template>
 
 <script>
@@ -80,15 +86,22 @@ export default {
       vehicleCarData: [],
       savingsData: [],
       houseData: [],
+      trashData: [],
+      resultC02: [],
       chart: null,
       chartSavings: null,
       chartHouseData: null,
+      chartTrashData: null,
+      resultChartC02: null,
+      
     };
   },
   mounted() {
     this.fetchCarData();
     this.fetchSavingsData();
     this.fetchHouseData();
+    this.fetchTrashData();
+    this.fetchResultC02();
   },
   methods: {
     async fetchCarData() {
@@ -151,37 +164,42 @@ export default {
             maintainAspectRatio: false,
             scales: {
               y: {
-                beginAtZero: true,
-                min: 0,
-                stepSize: 2,
-                ticks: {
-                  color: 'black',
-                },
-              },
-            },
-            plugins: {
-              title: {
-                display: true,
-                text: 'CO2-Emission und Ökologischer Fußabdruck',
-                color: 'black',
-              },
-              legend: {
-                display: true,
-                position: 'bottom',
-                labels: {
-                  color: 'black',
-                },
-              },
-              datalabels: {
-                display: false,
-              },
-            },
-            doughnut: {
-              borderWidth: 1,
-              categoryPercentage: 0.5,
-            },
-          },
-        });
+        beginAtZero: true,
+        min: 0,
+        stepSize: 2,
+        ticks: {
+          color: 'black',
+        },
+      },
+      x: {
+        ticks: {
+          color: 'black', // Hier setzen Sie die Textfarbe für die x-Achsen-Labels auf schwarz
+        },
+      },
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'CO2-Emission und Ökologischer Fußabdruck',
+        color: 'black',
+      },
+      legend: {
+        display: true,
+        position: 'bottom',
+        labels: {
+          color: 'black',
+        },
+      },
+      datalabels: {
+        display: false,
+      },
+    },
+    doughnut: {
+      borderWidth: 1,
+      categoryPercentage: 0.5,
+    },
+  },
+})
       } catch (error) {
         console.log(error);
       }
@@ -218,25 +236,31 @@ export default {
         const co2_savings = data.map((item) => parseFloat(item.co2_savings));
         const money_savings = data.map((item) => parseFloat(item.money_savings));
 
+        const labelCount = data.length;
+        const labelArray = Array.from({ length: labelCount }, (_, index) => {
+          const weekNumber = index + 1;
+          return `Woche ${weekNumber}`;
+        });
+
         const chartDataSavings = {
-  labels: ['Woche 1', 'Woche 2', 'Woche 3'], // Hier fügen Sie Ihre Zeitpunkte oder Labels ein
-  datasets: [
-    {
-      label: "C02-Ersparnis",
-      data: co2_savings,
-      backgroundColor: 'rgba(75, 192, 192, 0.7)',
-      borderColor: 'rgba(75, 192, 192, 1)',
-      borderWidth: 1,
-    },
-    {
-      label: "Geldersparnis",
-      data: money_savings,
-      backgroundColor: 'rgba(255, 159, 64, 0.7)',
-      borderColor: 'rgba(255, 159, 64, 1)',
-      borderWidth: 1,
-    },
-  ],
-};
+          labels: labelArray,
+          datasets: [
+            {
+              label: "C02-Ersparnis",
+              data: co2_savings,
+              backgroundColor: 'rgba(75, 192, 192, 0.7)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1,
+            },
+            {
+              label: "Geldersparnis",
+              data: money_savings,
+              backgroundColor: 'rgba(255, 159, 64, 0.7)',
+              borderColor: 'rgba(255, 159, 64, 1)',
+              borderWidth: 1,
+            },
+          ],
+        };
 
         if (this.chartSavings) {
           this.chartSavings.destroy();
@@ -251,37 +275,42 @@ export default {
             maintainAspectRatio: false,
             scales: {
               y: {
-                beginAtZero: true,
-                min: 0,
-                stepSize: 2,
-                ticks: {
-                  color: 'black',
-                },
-              },
-            },
-            plugins: {
-              title: {
-                display: true,
-                text: 'C02-Ersparnis und Geldersparnis',
-                color: 'black',
-              },
-              legend: {
-                display: true,
-                position: 'bottom',
-                labels: {
-                  color: 'black',
-                },
-              },
-              datalabels: {
-                display: false,
-              },
-            },
-            doughnut: {
-              borderWidth: 1,
-              categoryPercentage: 0.5,
-            },
-          },
-        });
+        beginAtZero: true,
+        min: 0,
+        stepSize: 2,
+        ticks: {
+          color: 'black',
+        },
+      },
+      x: { // Hier fügen Sie das x-Objekt für die x-Achse hinzu
+        ticks: {
+          color: 'black', // Hier setzen Sie die Textfarbe für die Wochennamen auf schwarz
+        },
+      },
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'C02-Ersparnis und Geldersparnis',
+        color: 'black',
+      },
+      legend: {
+        display: true,
+        position: 'bottom',
+        labels: {
+          color: 'black',
+        },
+      },
+      datalabels: {
+        display: false,
+      },
+    },
+    doughnut: {
+      borderWidth: 1,
+      categoryPercentage: 0.5,
+    },
+  },
+});
       } else {
         console.error('Keine Daten in der API-Antwort gefunden oder leeres Array.');
       }
@@ -357,12 +386,12 @@ this.chartHouseData = new Chart(ctx, {
     scales: {
       y: [
         {
-          id: 'y-axis-1', // ID der ersten Y-Achse
-          position: 'left', // Position der ersten Y-Achse
+          id: 'y-axis-1',
+          position: 'left',
           ticks: {
             beginAtZero: true,
             min: 0,
-            stepSize: 500, // Passen Sie den Schritt nach Bedarf an
+            stepSize: 500,
             color: 'black',
           },
           scaleLabel: {
@@ -371,12 +400,12 @@ this.chartHouseData = new Chart(ctx, {
           },
         },
         {
-          id: 'y-axis-2', // ID der zweiten Y-Achse
-          position: 'right', // Position der zweiten Y-Achse
+          id: 'y-axis-2',
+          position: 'right',
           ticks: {
             beginAtZero: true,
             min: 0,
-            stepSize: 100, // Passen Sie den Schritt nach Bedarf an
+            stepSize: 100,
             color: 'black',
           },
           scaleLabel: {
@@ -385,6 +414,11 @@ this.chartHouseData = new Chart(ctx, {
           },
         },
       ],
+      x: {
+        ticks: {
+          color: 'black', // Hier setzen Sie die Textfarbe für die x-Achsen-Labels auf schwarz
+        },
+      },
     },
     plugins: {
       title: {
@@ -419,7 +453,213 @@ this.chartHouseData = new Chart(ctx, {
     console.error('Fehler beim Abrufen der Daten:', error);
   }
 },
-}
+
+async fetchTrashData() {
+  try {
+    const token = localStorage.getItem('token');
+    const decodedToken = parseToken(token);
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        userId: decodedToken.id,
+      },
+    };
+
+    const response = await axios.get('http://localhost:3000/saveTrashData', config); 
+
+    if (response.status === 200) {
+      const data = response.data.data;
+
+      if (Array.isArray(data) && data.length > 0) {
+        const co2_impact_per_sheet = data.map((item) => parseFloat(item.co2_impact_per_sheet));
+        const co2_impact_per_kg = data.map((item) => parseFloat(item.co2_impact_per_kg));
+
+        const chartTrashData = {
+          labels: ['Trash'],
+          datasets: [
+            {
+              label: "C02 Verbrauch Papier",
+              data: co2_impact_per_sheet, // Hier sollte es co2_impact_per_sheet sein
+              backgroundColor: 'rgba(75, 192, 192, 0.7)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1,
+            },
+            {
+              label: "C02 Verbrauch Plastik",
+              data: co2_impact_per_kg, // Hier sollte es co2_impact_per_kg sein
+              backgroundColor: 'rgba(255, 159, 64, 0.7)',
+              borderColor: 'rgba(255, 159, 64, 1)',
+              borderWidth: 1,
+            },
+          ],
+        };
+
+        if (this.chartTrashData) {
+          this.chartTrashData.destroy();
+        }
+
+        const ctx = document.getElementById('chartTrashData').getContext('2d');
+        this.chartTrashData = new Chart(ctx, {
+          type: 'bar',
+          data: chartTrashData, // Hier sollte es chartTrashData sein
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+        beginAtZero: true,
+        min: 0,
+        stepSize: 2,
+        ticks: {
+          color: 'black',
+        },
+      },
+      x: {
+        ticks: {
+          color: 'black', // Hier setzen Sie die Textfarbe für die x-Achsen-Labels auf schwarz
+        },
+      },
+    },
+    plugins: {
+      title: {
+        display: true,
+        text: 'CO2-Emission und Ökologischer Fußabdruck',
+        color: 'black',
+      },
+      legend: {
+        display: true,
+        position: 'bottom',
+        labels: {
+          color: 'black',
+        },
+      },
+      datalabels: {
+        display: false,
+      },
+    },
+    doughnut: {
+      borderWidth: 1,
+      categoryPercentage: 0.5,
+    },
+  },
+});
+      }
+    }
+  } catch (error) {
+    console.error(error);
+  }
+},
+
+async fetchResultC02() {
+  try {
+    const token = localStorage.getItem('token');
+    const decodedToken = parseToken(token);
+
+    const config = {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        userId: decodedToken.id,
+      },
+    };
+
+    const response = await axios.get('http://localhost:3000/resultC02', config);
+
+    if (response.status === 200) {
+      const data = response.data;
+
+      const carsResult = data.carsResult;
+      const houseResult = [data.houseResult.reduce((sum, value) => sum + value, 0) / data.houseResult.length];
+      const trashResult = [data.trashResult.reduce((sum, value) => sum + value, 0) / data.trashResult.length];
+
+      const label = ['Auto', 'Haus', 'Müll', 'Gesamt']; 
+
+      const ctxCars = document.getElementById('resultChartCars').getContext('2d');
+      const ctxHouse = document.getElementById('resultChartHouse').getContext('2d');
+      const ctxTrash = document.getElementById('resultChartTrash').getContext('2d');
+      const ctxCombined = document.getElementById('resultChartC02').getContext('2d');
+
+      const combinedResult = [carsResult.reduce((sum, value) => sum + value, 0) + houseResult[0] + trashResult[0]];
+      this.createBarChart(ctxCars, label[0], carsResult);
+      this.createBarChart(ctxHouse, label[1], houseResult);
+      this.createBarChart(ctxTrash, label[2], trashResult);
+      this.createBarChart(ctxCombined, label[3], combinedResult);
+    } else {
+      console.error('Fehler beim Abrufen der Daten vom Server.', response.status);
+    }
+  } catch (error) {
+    console.error('Fehler beim Abrufen der Daten:', error);
+  }
+},
+
+createBarChart(ctx, label, data) {
+  new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: [label],
+      datasets: [
+        {
+          label: label,
+          data: data,
+          backgroundColor: 'rgba(255, 71, 72, 1)',
+          borderColor: 'rgba(75, 192, 192, 1)',
+          borderWidth: 1,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          min: 0,
+          stepSize: 2,
+          ticks: {
+            color: 'black',
+          },
+        },
+        x: {
+          ticks: {
+            color: 'black',
+          },
+        },
+      },
+      plugins: {
+        title: {
+          display: true,
+          text: label,
+          color: 'black',
+        },
+        legend: {
+          display: false,
+          position: 'bottom',
+          labels: {
+            color: 'black',
+          },
+        },
+        datalabels: {
+          display: true,
+          color: 'black',
+          formatter: function(value) {
+            return label + ': ' + value.toFixed(2) + ' CO2';
+          },
+        },
+      },
+      doughnut: {
+        borderWidth: 1,
+        categoryPercentage: 0.5,
+      },
+    },
+  });
+},
+ 
+
+},
  
 };
 </script>
@@ -502,19 +742,20 @@ this.chartHouseData = new Chart(ctx, {
 .charts-container {
   display: flex;
   justify-content: space-between;
-  width: 90%;
-  padding: 20px;
-  
 }
 
 .chart {
-  width: 40%;
-  height: 300px;
-  background-color: #fff; /* Hintergrundfarbe der Charts anpassen */
+  flex: 1;
+  margin: 10px;
+}
+
+.small-canvas {
+  width: 100%; /* Canvas-Elemente passen in ihre übergeordneten Divs */
+  height: auto; 
+  background-color: #bfa480;/* Automatische Anpassung der Höhe entsprechend der Breite */
   border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-  padding: 20px;
-  margin: 0 50px
+  padding: 5px;
+  
 }
 
 @media (max-width: 768px) {

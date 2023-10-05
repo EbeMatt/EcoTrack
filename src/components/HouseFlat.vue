@@ -409,16 +409,16 @@ export default {
       
 
       // Hier kommt der Code zur Aktualisierung der Benutzeroberfläche und weiterer Berechnungen
-      vm.calculateHeatingConsumption();
-      vm.calculateWaterConsumption();
-      vm.calculateEnergyClass();
-      vm.chartData = [
-        parseFloat(vm.scalaHeat) || 0,
-        parseFloat(vm.sizeHouse) || 0,
-        parseFloat(vm.powerConsumption) || 0,
-      ];
-      vm.chart.destroy();
-      vm.createChart();
+                vm.calculateHeatingConsumption();
+                vm.calculateWaterConsumption();
+                vm.calculateEnergyClass();
+                vm.chartData = [
+                  parseFloat(vm.scalaHeat) || 0,
+                  parseFloat(vm.sizeHouse) || 0,
+                  parseFloat(vm.powerConsumption) || 0,
+                   ];
+              vm.chart.destroy();
+              vm.createChart();
 
       console.log('Daten erfolgreich aktualisiert oder hinzugefügt!');
     })
@@ -427,13 +427,7 @@ export default {
       // Fehlerbehandlung, falls etwas schiefgeht
     });
 
-               axios.post('http://localhost:3000/saveHouseData', houseData)
-               .then(function (response) {
-                  console.log(response);
-                })
-                .catch(function (error) {
-                  console.log(error);
-                });
+               
                 
                
 
