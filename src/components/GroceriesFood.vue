@@ -123,8 +123,9 @@
 </template>
 
 <script>
+import axios from "axios";
 import NavBar from "./NavBar.vue";
-
+import { parseToken } from "./tokenUtils";
 
 
 export default {
@@ -351,37 +352,201 @@ totalCO2: 0,
       this.$emit('closeGroceriesFood');
     },
     calculateCO2() {
+
+
       this.totalCO2 = this.selectedItems.reduce((total, itemName) => {
         const selectedItem = this.groceriesData.find(data => data.name === itemName);
         return total + selectedItem.co2;
       }, 0);
+
+      this.saveC02DataFruitVegetables();
     },
+
+    
+
+    async saveC02DataFruitVegetables() {
+  try {
+    const token = localStorage.getItem('token');
+    const decodedToken = parseToken(token);
+
+    console.log(decodedToken);
+
+    const fruitData = {
+      userId: decodedToken.id,
+      fruit_vegetables: this.totalCO2
+    };
+
+    console.log(fruitData)
+    
+    axios.post('http://localhost:3000/saveC02DataFruitVegetables', fruitData)
+      .then(function(response) {
+        console.log(response.data);
+      })
+      .catch(function(error) {
+        console.error('Fehler beim Speichern der CO2-Daten: ' + error.message);
+      });
+  } catch (error) {
+    console.error('Fehler beim Speichern der CO2-Daten: ' + error.message);
+  }
+
+},
+
+
+
+
     calculateCO2Dairy() {
       this.totalCO2Dairy = this.selectedItemsDairy.reduce((total, itemName) => {
         const selectedItem = this.dairyData.find(data => data.name === itemName);
         return total + selectedItem.co2;
       }, 0);
+
+      this.saveC02Dairy();
     },
+
+    async saveC02Dairy() {
+  try {
+    const token = localStorage.getItem('token');
+    const decodedToken = parseToken(token);
+
+    console.log(decodedToken);
+
+    const dairyData = {
+      userId: decodedToken.id,
+      milk_product: this.totalCO2Dairy
+    };
+
+    console.log(dairyData)
+
+    axios.post('http://localhost:3000/saveC02Dairy', dairyData)
+      .then(function(response) {
+        console.log(response.data);
+      })
+      .catch(function(error) {
+        console.error('Fehler beim Speichern der CO2-Daten: ' + error.message);
+      });
+  } catch (error) {
+    console.error('Fehler beim Speichern der CO2-Daten: ' + error.message);
+
+
+    }
+  },
+
+
     calculateCO2Meat() {
       this.totalCO2Meat = this.selectedItemsMeat.reduce((total, itemName) => {
         const selectedItem = this.meatData.find(data => data.name === itemName);
         return total + selectedItem.co2;
       }, 0);
+
+      this.saveC02Meat();
     },
+
+    async saveC02Meat() {
+  try {
+    const token = localStorage.getItem('token');
+    const decodedToken = parseToken(token);
+
+    console.log(decodedToken);
+
+    const meatData = {
+      userId: decodedToken.id,
+      meat: this.totalCO2Meat
+    };
+
+    console.log(meatData)
+
+    axios.post('http://localhost:3000/saveC02Meat', meatData)
+      .then(function(response) {
+        console.log(response.data);
+      })
+      .catch(function(error) {
+        console.error('Fehler beim Speichern der CO2-Daten: ' + error.message);
+      });
+  } catch (error) {
+    console.error('Fehler beim Speichern der CO2-Daten: ' + error.message);
+  }
+},
+
+
     calculateCO2Starchy() {
       this.totalCO2Starchy = this.selectedItemsStarchy.reduce((total, itemName) => {
         const selectedItem = this.starchyData.find(data => data.name === itemName);
        return total + selectedItem.co2;
       }, 0);
+
+      this.saveC02Starchy();
     },
+
+    async saveC02Starchy() {
+
+  try {
+    const token = localStorage.getItem('token');
+    const decodedToken = parseToken(token);
+
+    console.log(decodedToken);
+
+    const starchyData = {
+      userId: decodedToken.id,
+      oil_sugar: this.totalCO2Starchy
+    };
+
+    console.log(starchyData);
+
+    axios.post('http://localhost:3000/saveC02Starchy', starchyData)
+      .then(function(response) {
+        console.log(response.data);
+      })
+      .catch(function(error) {
+        console.error('Fehler beim Speichern der CO2-Daten: ' + error.message);
+      });
+  } catch (error) {
+    console.error('Fehler beim Speichern der CO2-Daten: ' + error.message);
+  }
+},
+
+
+
+
+
     calculateCO2Drinks() {
   this.totalCO2Drinks = this.selectedItemsDrinks.reduce((total, itemName) => {
     const selectedItem = this.drinksData.find(data => data.name === itemName);
     return total + selectedItem.co2;
   }, 0);
+
+  this.saveC02Drinks();
 },
-  },
-};
+
+async saveC02Drinks() {
+  try {
+    const token = localStorage.getItem('token');
+    const decodedToken = parseToken(token);
+
+    console.log(decodedToken);
+
+    const drinksData = {
+      userId: decodedToken.id,
+      drinks: this.totalCO2Drinks
+    };
+
+    console.log(drinksData);
+
+    axios.post('http://localhost:3000/saveC02Drinks', drinksData)
+      .then(function(response) {
+        console.log(response.data);
+      })
+      .catch(function(error) {
+        console.error('Fehler beim Speichern der CO2-Daten: ' + error.message);
+      });
+  } catch (error) {
+    console.error('Fehler beim Speichern der CO2-Daten: ' + error.message);
+  }
+},
+
+},
+
+}
+
 </script>
 
 

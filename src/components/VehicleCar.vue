@@ -194,9 +194,9 @@ export default {
   const selectedFuel = this.selectedFuel; 
   const distance = this.distance; 
 
-  // Fügen Sie hier Überprüfungen auf null oder undefined hinzu
+  
   if (!selectedCarBrand || !purchaseDate || !consumption || !selectedFuel || !distance) {
-    // Überprüfe, ob alle erforderlichen Werte vorhanden sind
+    
     console.error("Nicht alle erforderlichen Felder sind ausgefüllt.");
     return;
   }
@@ -222,7 +222,7 @@ export default {
   });
 
   this.updateChart();
-  // Du kannst hier auch die Tabelle aktualisieren, falls benötigt
+  
 },
 
 
@@ -285,7 +285,7 @@ updateChart() {
 },
     calculateCO2(fuel) {
   if (!this.consumption || !this.distance) {
-    return 0; // Zeige 0, wenn Verbrauch oder Distanz fehlen
+    return 0; 
   }
 
   const co2PerLiter = this.co2Constants[fuel];
@@ -300,7 +300,7 @@ updateChart() {
 },
 calculateFootprint(fuel) {
   if (!this.distance) {
-    return 0; // Zeige 0, wenn Distanz fehlt
+    return 0; 
   }
 
   const footprintPerKm = fuel === 'elektro' ? 0 : 1;
@@ -369,8 +369,8 @@ body {
 }
 
 .save-button {
-  width: 100%; /* Ändere die Breite auf 100% */
-  max-width: 200px; /* Füge eine maximale Breite hinzu, um zu verhindern, dass er zu breit wird */
+  width: 100%; 
+  max-width: 200px; 
   appearance: none;
   background-color: #2ea44f;
   border: 1px solid rgba(27, 31, 35, .15);
@@ -438,8 +438,8 @@ h1 {
     }
 
     .box-car input, .box-car select {
-  width: 100%; /* Ändere die Breite auf 100% */
-  max-width: 300px; /* Füge eine maximale Breite hinzu, um zu verhindern, dass sie zu breit werden */
+  width: 100%; 
+  max-width: 300px; 
   height: 25px;
   border-radius: 5px;
   border: 2px solid #2ea44f;
@@ -478,24 +478,24 @@ td {
 .back-button {
   position: absolute;
   top: 150px;
-  left: 10px; /* 10px Abstand vom rechten Rand */
+  left: 10px; 
   background-color: #22bc1a;
-  color: white; /* Textfarbe auf Weiß setzen */
-  border: none; /* Keine Rand */
-  border-radius: 5px; /* Abrunde Ecken */
+  color: white; 
+  border: none; 
+  border-radius: 5px; 
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 40px;
-  padding: 10px 20px; /* 10px oben/unten, 20px links/rechts Innenabstand */
-  font-size: 16px; /* Schriftgröße anpassen */
-  transition: background-color 0.3s; /* Sanfter Übergang für die Hintergrundfarbe */
+  padding: 10px 20px; 
+  font-size: 16px; 
+  transition: background-color 0.3s; 
 }
 
-/* Hinzufügen eines Hover-Effekts */
+
 .back-button:hover {
-  background-color: #7d861c; /* Dunklere Hintergrundfarbe im Hover-Zustand */
+  background-color: #7d861c; 
 }
 
 .component-spacing {

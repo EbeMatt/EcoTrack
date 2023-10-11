@@ -23,6 +23,11 @@ import BerechnungsGrundlageFahrzeug from '@/components/BerechnungsGrundlageFahrz
 import SloganEcotrack from '@/components/SloganEcotrack.vue';
 import DataRights from '@/components/DataRights.vue';
 import ForgottPassword from '@/components/ForgottPassword.vue';
+import GameCenter from '@/components/GameCenter.vue';
+import GameCenterInfo from '@/components/GameCenterInfo.vue';
+import NavBarGameCenter from '@/components/NavBarGameCenter.vue';
+import GameCenterSetUp from '@/components/GameCenterSetUp.vue';
+import DataPersonTable from '@/components/DataPersonTable.vue';
 
 
 
@@ -146,9 +151,35 @@ const routes = [
     {
       name: 'ForgottPasword',
       path: '/forgottpassword',
-      component: ForgottPassword
-
+      component: ForgottPassword,
     },
+    {
+      name: 'GameCenter',
+      path: '/gamecenter',
+      component: GameCenter,
+    },
+    {
+      name: 'GameCenterInfo',
+      path: '/gamecenterinfo',
+      component: GameCenterInfo,
+    },
+    {
+      name: 'NavBarGameCenter',
+      path: '/navbargamecenter',
+      component: NavBarGameCenter,
+    },
+    {
+      name: 'GameCenterSetUp',
+      path: '/gamecentersetup',
+      component: GameCenterSetUp,
+    },
+    {
+      name: 'DataPersonTable',
+      path: '/datapersontable',
+      component: DataPersonTable,
+    },
+    
+    
   ];
 
 

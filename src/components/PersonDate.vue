@@ -47,7 +47,7 @@ export default {
   flex-direction: column;
   justify-content: flex-start;
   align-items: center;
-  min-height: 100%; /* Verhindert, dass der Container kleiner wird als die Buttons */
+  min-height: 100%; 
   width: 15%;
   padding-top: 150px;
   
@@ -56,7 +56,7 @@ export default {
   position: fixed;
   top: 0;
   left: 0;
-  overflow-y: auto; /* Fügt eine Scrollleiste hinzu, wenn die Buttons nicht auf den Bildschirm passen */
+  overflow-y: auto; 
 }
 
 .button-group {

@@ -60,10 +60,10 @@ export default {
     return {
       buyOnline: 'yes',
       distance: 5,
-      weight: 1000, // Annahme: Standardgewicht 1 kg
+      weight: 1000, 
       origin: 'china',
       destination: 'germany',
-      transportMethod: 'ship', // Standard: Schiff
+      transportMethod: 'ship', 
       carDistance: 0,
       customerDistance: 5,
       co2Emissions: '',
@@ -241,9 +241,9 @@ button:active {
 .box-purchases label {
   font-size: 18px;
   font-weight: bold;
-  margin-bottom: 5px; /* Abstand unter dem Label */
-  display: block; /* Ändert die Anzeige von Inline zu Block, um die Labels unter den Inputs zu positionieren */
-  text-align: center; /* Zentriert den Text horizontal */
+  margin-bottom: 5px; 
+  display: block; 
+  text-align: center; 
 }
 
 input {
@@ -264,7 +264,7 @@ select {
   height: 25px;
   border-radius: 5px;
   border: 2px solid #2ea44f;
-  margin: 10px auto; /* Auto-Margin links und rechts, um die Inputs zu zentrieren */
+  margin: 10px auto;
   text-align: center;
   font-size: 16px;
 }
@@ -272,24 +272,24 @@ select {
     .back-button {
   position: absolute;
   top: 150px;
-  left: 10px; /* 10px Abstand vom rechten Rand */
+  left: 10px; 
   background-color: #22bc1a;
-  color: white; /* Textfarbe auf Weiß setzen */
-  border: none; /* Keine Rand */
-  border-radius: 5px; /* Abrunde Ecken */
+  color: white; 
+  border: none; 
+  border-radius: 5px; 
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 40px;
-  padding: 10px 20px; /* 10px oben/unten, 20px links/rechts Innenabstand */
-  font-size: 16px; /* Schriftgröße anpassen */
-  transition: background-color 0.3s; /* Sanfter Übergang für die Hintergrundfarbe */
+  padding: 10px 20px; 
+  font-size: 16px; 
+  transition: background-color 0.3s; 
 }
 
-/* Hinzufügen eines Hover-Effekts */
+
 .back-button:hover {
-  background-color: #7d861c; /* Dunklere Hintergrundfarbe im Hover-Zustand */
+  background-color: #7d861c; 
 }
 
 </style>

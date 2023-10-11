@@ -49,7 +49,7 @@ import axios from 'axios';
                 })
                 .catch(function (error) {
                   console.error('Ein Fehler ist aufgetreten:', error);
-                  // Behandeln Sie den Fehler entsprechend, z. B. zeigen Sie eine Fehlermeldung für den Benutzer an.
+                  
                 });
 
         }

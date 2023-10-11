@@ -416,7 +416,7 @@ this.chartHouseData = new Chart(ctx, {
       ],
       x: {
         ticks: {
-          color: 'black', // Hier setzen Sie die Textfarbe für die x-Achsen-Labels auf schwarz
+          color: 'black', 
         },
       },
     },
@@ -482,14 +482,14 @@ async fetchTrashData() {
           datasets: [
             {
               label: "C02 Verbrauch Papier",
-              data: co2_impact_per_sheet, // Hier sollte es co2_impact_per_sheet sein
+              data: co2_impact_per_sheet, 
               backgroundColor: 'rgba(75, 192, 192, 0.7)',
               borderColor: 'rgba(75, 192, 192, 1)',
               borderWidth: 1,
             },
             {
               label: "C02 Verbrauch Plastik",
-              data: co2_impact_per_kg, // Hier sollte es co2_impact_per_kg sein
+              data: co2_impact_per_kg, 
               backgroundColor: 'rgba(255, 159, 64, 0.7)',
               borderColor: 'rgba(255, 159, 64, 1)',
               borderWidth: 1,
@@ -504,7 +504,7 @@ async fetchTrashData() {
         const ctx = document.getElementById('chartTrashData').getContext('2d');
         this.chartTrashData = new Chart(ctx, {
           type: 'bar',
-          data: chartTrashData, // Hier sollte es chartTrashData sein
+          data: chartTrashData, 
           options: {
             responsive: true,
             maintainAspectRatio: false,
@@ -519,7 +519,7 @@ async fetchTrashData() {
       },
       x: {
         ticks: {
-          color: 'black', // Hier setzen Sie die Textfarbe für die x-Achsen-Labels auf schwarz
+          color: 'black', 
         },
       },
     },

@@ -112,12 +112,12 @@ export default {
     return {
       trash: 'Bei mir wird alles getrennt',
       wasteKg: 'durchschnitt',
-      selectedPaper: 'freshFiber', // Default to Frischfaser-Papier
+      selectedPaper: 'freshFiber', 
       paperUsageAmount: null,
       usageEstimate: 'average',
-      plasticUsageAmount: null, // Default to Durchschnitt
+      plasticUsageAmount: null, 
       plasticCO2: 0,
-      dataSaved: false, // Flag to track if data has been saved
+      dataSaved: false, 
     };
   },
   methods: {
@@ -157,15 +157,15 @@ export default {
     },
     async saveDataTrash() {
       if (this.dataSaved) {
-        // Check if data has already been saved and confirm overwriting
+        
         const confirmResult = window.confirm('Sie haben bereits Werte eingegeben. Möchten Sie diese wirklich ersetzen?');
         if (!confirmResult) {
-          // If the user cancels, exit the function without further action
+          
           return;
         }
       }
 
-      // Data validation: Check if paper and plastic usage are valid numbers
+      
       if (!this.isNumeric(this.paperUsageAmount) || this.paperUsageAmount < 0 || !this.isNumeric(this.plasticUsageAmount) || this.plasticUsageAmount < 0) {
         alert('Bitte geben Sie gültige Werte für den Papier- und Plastikverbrauch ein.');
         return;
@@ -175,7 +175,7 @@ export default {
       const decodedToken = parseToken(token);
 
       try {
-        // Berechne die Werte hier, nachdem die Validierung bestanden wurde
+        
         const co2ImpactPerSheet = this.calculateCO2Impact;
         const paperUsagePerYear = this.usageAmountYear;
         const plasticUsagePerYear = this.calculatePlasticUsageAmountYear;
@@ -184,23 +184,23 @@ export default {
 
         const trashData = {
                   userId: decodedToken.id,
-                  paper_Type: this.selectedPaper,  // Statt 'selectedPaper'
-                  paper_Usage: this.paperUsageAmount,  // Statt 'paperUsageAmount'
-                  usage_Type: this.usageEstimate,  // Statt 'usageEstimate'
-                  paper_usage_per_month: this.paperUsageAmount,  // Statt 'paperUsageAmount'
+                  paper_Type: this.selectedPaper, 
+                  paper_Usage: this.paperUsageAmount,  
+                  usage_Type: this.usageEstimate,  
+                  paper_usage_per_month: this.paperUsageAmount,  
                   paper_usage_per_year: paperUsagePerYear,
                   co2_impact_per_sheet: co2ImpactPerSheet,
-                  plastic_Usage: this.plasticUsageAmount,  // Statt 'plasticUsageAmount'
-                  plastic_usage_per_month: this.plasticUsageAmount,  // Statt 'plasticUsageAmount'
+                  plastic_Usage: this.plasticUsageAmount, 
+                  plastic_usage_per_month: this.plasticUsageAmount,  
                   plastic_usage_per_year: plasticUsagePerYear,
                   co2_impact_per_kg: co2ImpactPerKg,
                 };
 
-        // Send the data to the server
+        
         const response = await axios.post('http://localhost:3000/saveTrashData', trashData);
         console.log(response.data);
 
-        // Set the dataSaved flag to true to display the table
+        
         this.dataSaved = true;
       } catch (error) {
         console.error('Fehler beim Speichern der Daten:', error);
@@ -219,31 +219,31 @@ export default {
 
   computed: {
     calculateCO2Impact() {
-      let co2PerSheet = 0; // CO2-Auswirkungen pro Blatt
+      let co2PerSheet = 0; 
       if (this.selectedPaper === 'freshFiberPaper') {
-        co2PerSheet = 1200 / 16; // 1,200 g CO2 für Frischfaser-Papier, geteilt durch 16 Seiten
+        co2PerSheet = 1200 / 16; 
       } else if (this.selectedPaper === 'recycledPaper') {
-        co2PerSheet = 700 / 16; // 700 g CO2 für recyceltes Papier, geteilt durch 16 Seiten
+        co2PerSheet = 700 / 16; 
       } else if (this.selectedPaper === 'normalPaper') {
-        co2PerSheet = 1000 / 16; // 1,000 g CO2 für normales Papier, geteilt durch 16 Seiten
+        co2PerSheet = 1000 / 16; 
       }
-      return co2PerSheet * this.paperUsageAmount; // Verwende paperUsageAmount hier
+      return co2PerSheet * this.paperUsageAmount; 
     },
 
     usageAmountYear() {
-      // Annahme: Ein Jahr hat 12 Monate
+      
       return this.paperUsageAmount * 12;
     },
 
     calculatePlasticCO2Impact() {
       // CO2-Berechnung für Plastik
-      const plasticCO2PerKg = 5 * 1000; // 5 Tonnen CO2 pro Tonne Plastik, umgerechnet in g
-      const plasticCO2 = (this.plasticUsageAmount * plasticCO2PerKg) / 12; // Monatlicher Verbrauch umgerechnet
-      return plasticCO2; // Ergebnis pro Monat
+      const plasticCO2PerKg = 5 * 1000; 
+      const plasticCO2 = (this.plasticUsageAmount * plasticCO2PerKg) / 12; 
+      return plasticCO2; 
     },
 
     calculatePlasticUsageAmountYear() {
-      // Annahme: Ein Jahr hat 12 Monate
+      
       return this.plasticUsageAmount * 12;
     },
   },
@@ -302,8 +302,8 @@ body {
 
 
 .save-button {
-  width: 100%; /* Ändere die Breite auf 100% */
-  max-width: 200px; /* Füge eine maximale Breite hinzu, um zu verhindern, dass er zu breit wird */
+  width: 100%;
+  max-width: 200px;
   appearance: none;
   background-color: #2ea44f;
   border: 1px solid rgba(27, 31, 35, .15);
@@ -367,8 +367,8 @@ button:active {
     }
 
     .box-trash input, .box-trash select {
-  width: 100%; /* Ändere die Breite auf 100% */
-  max-width: 300px; /* Füge eine maximale Breite hinzu, um zu verhindern, dass sie zu breit werden */
+  width: 100%;
+  max-width: 300px; 
   height: 25px;
   border-radius: 5px;
   border: 2px solid #2ea44f;
@@ -379,21 +379,21 @@ button:active {
 }
 
 .box-trash input[type="range"] {
-  appearance: none; /* Entfernt die Standard-Styling */
-  background-color: #2ea44f; /* Setzt die gewünschte Hintergrundfarbe (Grün) */
-  height: 5px; /* Passe die Höhe des Balkens an */
-  border-radius: 3px; /* Runde die Ecken des Balkens ab */
+  appearance: none; 
+  background-color: #2ea44f; 
+  height: 5px; 
+  border-radius: 3px; 
 }
 
-/* Ändere die Farbe des Daumens (Punkt) */
+
 .box-trash input[type="range"]::-webkit-slider-thumb {
-  appearance: none; /* Entfernt die Standard-Styling */
-  width: 15px; /* Breite des Daumens */
-  height: 15px; /* Höhe des Daumens */
-  background-color: #2ea44f; /* Setzt die gewünschte Daumenfarbe (Grün) */
-  border-radius: 50%; /* Macht den Daumen rund */
-  position: relative; /* Position relativ zum Balken */
-  transform: translateY(-10px); /* Positioniere den Daumen innerhalb des Balkens */
+  appearance: none; 
+  width: 15px; 
+  height: 15px; 
+  background-color: #2ea44f;
+  border-radius: 50%; 
+  position: relative; 
+  transform: translateY(-10px); 
 }
 
 
@@ -426,24 +426,24 @@ td {
 .back-button {
   position: absolute;
   top: 150px;
-  left: 10px; /* 10px Abstand vom rechten Rand */
+  left: 10px;
   background-color: #22bc1a;
-  color: white; /* Textfarbe auf Weiß setzen */
-  border: none; /* Keine Rand */
-  border-radius: 5px; /* Abrunde Ecken */
+  color: white; 
+  border: none; 
+  border-radius: 5px; 
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 40px;
-  padding: 10px 20px; /* 10px oben/unten, 20px links/rechts Innenabstand */
-  font-size: 16px; /* Schriftgröße anpassen */
-  transition: background-color 0.3s; /* Sanfter Übergang für die Hintergrundfarbe */
+  padding: 10px 20px; 
+  font-size: 16px; 
+  transition: background-color 0.3s; 
 }
 
-/* Hinzufügen eines Hover-Effekts */
+
 .back-button:hover {
-  background-color: #7d861c; /* Dunklere Hintergrundfarbe im Hover-Zustand */
+  background-color: #7d861c; 
 }
 
 

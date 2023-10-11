@@ -408,7 +408,7 @@ export default {
                    console.log(response);
       
 
-      // Hier kommt der Code zur Aktualisierung der Benutzeroberfläche und weiterer Berechnungen
+      
                 vm.calculateHeatingConsumption();
                 vm.calculateWaterConsumption();
                 vm.calculateEnergyClass();
@@ -481,7 +481,7 @@ body {
 .box-house {
   display: flex;
   flex-direction: row;
-  flex-wrap: wrap; /* Erlaube Zeilenumbrüche innerhalb des Containers */
+  flex-wrap: wrap; 
   justify-content: space-between;
   background: #fafafa;
   padding: 20px;
@@ -494,24 +494,24 @@ body {
 
 .left-side,
 .right-side {
-  flex: 1; /* Lass die linke und rechte Seite flexibel, um den verfügbaren Platz zu nutzen */
+  flex: 1;
   display: flex;
   flex-direction: column;
-  flex-basis: calc(50% - 10px); /* Auf 50% der Container-Breite setzen, mit etwas Abstand dazwischen */
-  margin-right: 10px; /* Abstand zwischen den beiden Seiten */
+  flex-basis: calc(50% - 10px); 
+  margin-right: 10px; 
 }
 
-/* Stil für Elemente auf der linken Seite */
+
 .left-side label,
 .left-side input,
 .left-side select,
 .left-side p 
 .left-side option {
   margin-bottom: 10px;
-  margin-left: 10px; /* Abstand zwischen den Elementen */
+  margin-left: 10px; 
 }
 
-/* Stil für Elemente auf der rechten Seite */
+
 .right-side label,
 .right-side input,
 .right-side select,
@@ -519,7 +519,7 @@ body {
 
 .right-side option {
   margin-bottom: 10px;
-  margin-left: 10px; /* Abstand zwischen den Elementen */
+  margin-left: 10px;
 }
 
 .left-element {
@@ -530,7 +530,7 @@ body {
   margin-left: 10px;
 }
 
-/* Wende die gemeinsame Klasse auf Optionen auf der linken Seite an */
+
 .left-side .option-style {
   margin-left: 10px;
 }
@@ -539,7 +539,7 @@ body {
   margin-left: 10px;
 }
 
-/* Wende die gemeinsame Klasse auf Optionen auf der linken Seite an */
+
 .right-side .option-style {
   margin-left: 10px;
 }
@@ -635,7 +635,7 @@ h1 {
   width: 300px;
   height: 30px;
   border-radius: 5px;
-  border: 2px solid #2ea44f; /* Aktualisierte Border-Farbe */
+  border: 2px solid #2ea44f; 
   margin-bottom: 10px;
   margin: 10px;
   text-align: center;
@@ -724,24 +724,24 @@ td {
 .back-button {
   position: absolute;
   top: 150px;
-  left: 10px; /* 10px Abstand vom rechten Rand */
+  left: 10px; 
   background-color: #22bc1a;
-  color: white; /* Textfarbe auf Weiß setzen */
-  border: none; /* Keine Rand */
-  border-radius: 5px; /* Abrunde Ecken */
+  color: white; 
+  border: none; 
+  border-radius: 5px; 
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 40px;
-  padding: 10px 20px; /* 10px oben/unten, 20px links/rechts Innenabstand */
-  font-size: 16px; /* Schriftgröße anpassen */
-  transition: background-color 0.3s; /* Sanfter Übergang für die Hintergrundfarbe */
+  padding: 10px 20px; 
+  font-size: 16px;
+  transition: background-color 0.3s; 
 }
 
-/* Hinzufügen eines Hover-Effekts */
+
 .back-button:hover {
-  background-color: #7d861c; /* Dunklere Hintergrundfarbe im Hover-Zustand */
+  background-color: #7d861c;
 }
 
 

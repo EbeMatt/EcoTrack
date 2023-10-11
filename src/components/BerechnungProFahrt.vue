@@ -93,7 +93,7 @@ import axios from 'axios';
       });
   },
 
-    // ... (weitere Methoden) ...
+    
   },
 };
 </script>

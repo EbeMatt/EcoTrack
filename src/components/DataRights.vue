@@ -38,7 +38,7 @@
 <script>
 export default {
   name: 'DataRights',
-  methods: { // Sie haben "method" statt "methods" verwendet
+  methods: { 
     goBackToEcoTrack() {
       this.$router.push('/ecotrack');
     }
@@ -52,7 +52,7 @@ export default {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh; /* Die Karte wird vertikal zentriert, die gesamte Höhe des Bildschirms einnehmend */
+    height: 100vh; 
 }
 .card {
    display: flex;
@@ -70,35 +70,35 @@ export default {
 
 .card h2,
 .card h3 {
-    margin: 10px 0; /* Verringern Sie den Abstand oberhalb und unterhalb der Überschriften */
+    margin: 10px 0; 
 }
 
 .card ul,
 .card p {
-    margin: 5px 0; /* Verringern Sie den Abstand oberhalb und unterhalb von Listen und Absätzen */
+    margin: 5px 0; 
 }
 
 .back-button {
   position: absolute;
   top: 150px;
-  left: 10px; /* 10px Abstand vom rechten Rand */
+  left: 10px; 
   background-color: #22bc1a;
-  color: white; /* Textfarbe auf Weiß setzen */
-  border: none; /* Keine Rand */
-  border-radius: 5px; /* Abrunde Ecken */
+  color: white; 
+  border: none; 
+  border-radius: 5px; 
   cursor: pointer;
   display: flex;
   justify-content: center;
   align-items: center;
   height: 40px;
-  padding: 10px 20px; /* 10px oben/unten, 20px links/rechts Innenabstand */
-  font-size: 16px; /* Schriftgröße anpassen */
-  transition: background-color 0.3s; /* Sanfter Übergang für die Hintergrundfarbe */
+  padding: 10px 20px; 
+  font-size: 16px; 
+  transition: background-color 0.3s; 
 }
 
-/* Hinzufügen eines Hover-Effekts */
+
 .back-button:hover {
-  background-color: #7d861c; /* Dunklere Hintergrundfarbe im Hover-Zustand */
+  background-color: #7d861c; 
 }
 
 </style>

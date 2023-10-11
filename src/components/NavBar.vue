@@ -11,6 +11,9 @@
           <router-link to="../mydate">Meine Daten</router-link>
         </li>
         <li>
+          <router-link to="../datapersontable">Datenblatt</router-link>
+        </li>
+        <li>
           <a href="#">Diagramme</a>
           <ul>
             <li><a href="#">Haushalt</a></li>
@@ -31,7 +34,14 @@
         <li>
           <router-link to="../savetipps">Tipps zum Sparen</router-link>
         </li>
-        <li><a href="#">Meine Erfolge</a></li>
+        <li>
+          <a href="#">Meine Erfolge</a>
+          <ul>
+            <li>
+              <router-link to="../gamecenter">Eco Challenge</router-link>
+            </li>
+          </ul>
+        </li>
         <li><a href="#" @click="logout()">Log out</a></li>
       </ul>
     </nav>
@@ -54,15 +64,15 @@ export default {
     document.cookie = name + "=" + value + ";" + expires + ";path=/";
   },
   logout() {
-    // Löschen Sie den Token-Cookie und den UserID-Cookie
+    // löscht den Token-Cookie und den UserID-Cookie
     this.setCookie('token', '', -1);
     this.setCookie('userId', '', -1);
 
-    // Löschen Sie auch die Token- und UserID-Einträge aus dem localStorage
+    // löscht auch die Token- und UserID-Einträge aus dem localStorage
     localStorage.removeItem('token');
     localStorage.removeItem('userId');
 
-    // Navigieren Sie zur gewünschten Seite
+    // navigiert zur gewünschten Seite
     this.$router.push('/ecotrack');
   }
 }

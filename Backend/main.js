@@ -450,6 +450,189 @@ app.post('/saveTrashData', async (req, res) => {
   }
 });
 
+// fügt die Früchte und Obst C02 werte in die datenbank hinzu
+
+app.post('/saveC02DataFruitVegetables', async (req, res) => {
+  console.log('SaveC02DataFruitVegetables called!');
+
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const userId = req.body.userId;
+  console.log('UserID aus dem Request:', req.body.userId);
+  const fruit_vegetables = req.body.fruit_vegetables;
+
+  try {
+    const result = await query('SELECT * FROM food WHERE UserID = ?', [userId]);
+
+    if (result.length > 0) {
+      await query('UPDATE food SET fruit_vegetables = ? WHERE UserID = ?',
+        [fruit_vegetables, userId]);
+    } else {
+      await query('INSERT INTO food (UserID, fruit_vegetables) VALUES (?, ?)',
+        [userId, fruit_vegetables]);
+    }
+
+    res.send({
+      success: true,
+      message: null
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: 'Fehler beim Speichern der CO2-Daten'
+    });
+  }
+});
+
+
+// fügt die Milchprodkte in die datenbank hinzu 
+
+app.post('/saveC02Dairy', async ( req, res) => {
+  console.log('SaveC02Dairy called!');
+
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const userId = req.body.userId;
+  console.log('UserID aus dem Request:', req.body.userId);
+  const milk_product = req.body.milk_product;
+
+  try {
+    const result = await query('SELECT * FROM food WHERE UserID = ?', [userId]);
+
+    if (result.length > 0) {
+      await query('UPDATE food SET milk_product = ? WHERE UserID = ?',
+        [milk_product, userId]);
+    } else {
+      await query('INSERT INTO food (UserID, milk_product) VALUES (?, ?)',
+        [userId, milk_product]);
+    }
+
+    res.send({
+      success: true,
+      message: null
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: 'Fehler beim Speichern der CO2-Daten'
+    });
+  }
+});
+
+// fügt das fleisch hinzu
+
+app.post('/saveC02Meat', async ( req, res) => {
+  console.log('SaveC02Meat called!');
+
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const userId = req.body.userId;
+  console.log('UserID aus dem Request:', req.body.userId);
+  const meat = req.body.meat;
+
+  try {
+    const result = await query('SELECT * FROM food WHERE UserID = ?', [userId]);
+
+    if (result.length > 0) {
+      await query('UPDATE food SET meat = ? WHERE UserID = ?',
+        [meat, userId]);
+    } else {
+      await query('INSERT INTO food (UserID, meat) VALUES (?, ?)',
+        [userId, meat]);
+    }
+
+    res.send({
+      success: true,
+      message: null
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: 'Fehler beim Speichern der CO2-Daten'
+    });
+  }
+});
+
+// fügt ölhaltige sachen hinzu
+
+app.post('/saveC02Starchy', async (req, res) => {
+  console.log('SaveC02Starchy called!');
+
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const userId = req.body.userId;
+  console.log('UserID aus dem Request:', req.body.userId);
+  const oil_sugar = req.body.oil_sugar;
+
+  try {
+    const result = await query('SELECT * FROM food WHERE UserID = ?', [userId]);
+
+    if (result.length > 0) {
+      await query('UPDATE food SET oil_sugar = ? WHERE UserID = ?',
+        [oil_sugar, userId]);
+    } else {
+      await query('INSERT INTO food (UserID, oil_sugar) VALUES (?, ?)',
+        [userId, oil_sugar]);
+    }
+
+    res.send({
+      success: true,
+      message: null
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: 'Fehler beim Speichern der CO2-Daten'
+    });
+  }
+});
+
+
+// fügt die drinks hinzu
+
+app.post('/saveC02Drinks', async (req, res) => {
+  console.log('SaveC02Drinks called!');
+
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const userId = req.body.userId;
+  console.log('UserID aus dem Request:', req.body.userId);
+  const drinks = req.body.drinks;
+
+  try {
+    const result = await query('SELECT * FROM food WHERE UserID = ?', [userId]);
+
+    if (result.length > 0) {
+      await query('UPDATE food SET drinks = ? WHERE UserID = ?',
+        [drinks, userId]);
+    } else {
+      await query('INSERT INTO food (UserID, drinks) VALUES (?, ?)',
+        [userId, drinks]);
+    }
+
+    res.send({
+      success: true,
+      message: null
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).send({
+      success: false,
+      message: 'Fehler beim Speichern der CO2-Daten'
+    });
+  }
+});
+
+
 app.get('/saveTrashData', async (req, res) => {
   console.log('saveTrashData called!');
 
@@ -505,6 +688,134 @@ app.get('/resultC02', async (req, res) => {
       message: 'Fehler beim Laden der Daten'
     });
   }
+});
+
+// holt daten für das Datenblatt
+
+app.get('/userData', async (req, res) => {
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const userId = req.query.userId; // Ändere req.body.userId zu req.query.userId
+
+  try {
+    const userDataQuery = 'SELECT Name, Birthday, Gender, Work FROM user WHERE ID = ?';
+    const userData = await query(userDataQuery, [userId]);
+
+    if (userData.length === 0) {        
+      res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    } else {
+      res.json(userData[0]);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Fehler beim Abrufen der Benutzerdaten.' });
+  } finally {
+    con.end();
+  }
+});
+
+
+// Gruppe erstellen // noch vervollständigen
+app.post('/groups', async (req, res) => {
+  console.log('groups called!');
+
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const userId = req.body.userId;
+  const group_name = req.body.group_name;
+  const admin_id = req.body.admin_id;
+
+  try {
+    const result = await query('SELECT * FROM groups WHERE UserID = ? AND admin_id = ? AND group_name = ?', [userId, admin_id, group_name]);
+
+    if (result.length > 0) {
+      res.status(400).json({ message: 'Gruppe bereits vorhanden' });
+    } else {
+      await query('INSERT INTO groups (UserID, admin_id, group_name) VALUES (?, ?, ?)', [userId, admin_id, group_name]);
+      res.json({ message: 'Gruppe erfolgreich erstellt' });
+    }
+  } catch (error) {
+    console.error('Fehler beim Erstellen der Gruppe', error);
+    res.status(500).json({ message: 'Fehler beim Erstellen der Gruppe' });
+  }
+});
+
+// Ichecht die Email ob sie vorhanden ist in der Datenbank umd den user die Einladungsemail zu senden 
+app.post('/checkEmail', async (req, res) => {
+  console.log('checkEmail is called!');
+
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const email = req.body.email;
+
+  try {
+    const user = await query('SELECT * FROM user WHERE Email LIKE ?', [email]);
+
+    if (user.length > 0) {
+      return res.status(404).json({ message: 'Benutzer nicht gefunden' });
+    }
+
+    res.json({ message: 'Benutzer gefunden' });
+  } catch (error) {
+    console.error('Fehler beim Suchen des Benutzers', error);
+    res.status(500).json({ message: 'Fehler beim Suchen des Benutzers' });
+  }
+});
+
+// erstell eine einladungsemail
+
+app.post('/sendInviteEmail', async (req, res) => {
+  console.log('sendInviteEmail is called!');
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const email = req.body.email;
+
+  try {
+    const user = await query('SELECT * FROM user WHERE Email LIKE ?', [email]);
+
+    if (user.length > 0) {
+      return res.status(404).json({ message: 'Benutzer nicht gefunden' });
+    }
+
+    // E-Mail-Konfiguration
+    const transporter = nodemailer.createTransport({
+      host: 'smtp.gmx.net',
+      port: 587, // oder 465 für SSL
+      secure: false, // true für SSL
+      auth: {
+        user: 'ecotrack@gmx.at', 
+        password: 'Ebenberger12!',
+      }
+    });
+
+    const mailOptions = {
+      from: 'ecotrack@gmx.at',
+      to: email,
+      subject: 'Einladung zu EcoTrack',
+      text: 'Du wurdest zu einer Gruppe eingeladen. Bitte registriere dich unter http://localhost:4200/register'
+    };
+
+    // E-Mail senden
+
+    transporter.sendMail(mailOptions, (error, info) => {
+      if (error) {
+        console.error('Fehler beim Senden der E-Mail:', error);
+        res.status(500).json({ message: 'Fehler beim Senden der E-Mail' });
+      } else {
+        console.log('E-Mail erfolgreich gesendet:', info.response);
+        res.json({ message: 'E-Mail erfolgreich gesendet' });
+      }
+    }
+    );
+  } catch (error) {
+    console.error('Fehler beim Senden der E-Mail:', error);
+    res.status(500).json({ message: 'Fehler beim Senden der E-Mail' });
+  }
+
 });
 
 
