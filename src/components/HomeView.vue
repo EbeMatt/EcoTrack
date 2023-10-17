@@ -17,6 +17,7 @@
           <p>Sie können jederzeit Ihren Fortschritt verfolgen, das Ersparnisse einsehen und wertvolle Tipps bei Ihrer Familie oder Ihrem Freundeskreis teilen.</p>
           <p>Zudem können Sie noch unter <strong>Meine Erfolge</strong> Punkte erreichen und so das nächste Level erreichen, aber noch wichtiger, Sie sparen so CO2 und Geld.</p>
         </div>
+        <img src="../assets/World.png" alt="World">
       </div>
   
   
@@ -61,6 +62,17 @@ body {
   width: 100%;
  
     
+}
+
+img {
+  width: 40%;
+  height: 40%;
+  object-fit: cover;
+  position: absolute;
+  top:35%;
+  right:10%;
+  border-radius: 50%;
+  z-index: -1;
 }
 .information-container {
   display: flex;

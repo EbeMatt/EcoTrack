@@ -29,9 +29,12 @@ import axios from 'axios';
     },
     methods: {
 
+      
+
        async sendNewPassword() {
                 const name = document.getElementById("nameLogin").value;
                 const email = document.getElementById("email").value;
+               
 
                 axios.post('http://localhost:3000/forgottPassword', {
                   name: name,
@@ -42,6 +45,7 @@ import axios from 'axios';
                   if (response.data.success) {
                     // Der Benutzer existiert, zeige Erfolgsmeldung oder starte den Prozess zur Zurücksetzung des Passworts.
                     alert('In wenigen Minuten erhalten Sie die E-Mail mit Ihrem neuen Passwort.');
+                    this.$router.push('/ecotrack'); // warum navigiert es nicht zu ecotrack?
                   } else {
                     // Der Benutzer existiert nicht.
                     alert('Sie haben sich noch nicht registriert!');

@@ -14,7 +14,7 @@
         <option value="3">3</option>
         <option value="4">4</option>
       </select>
-      <label for="size" class="left-element">Größe des Wohnraumes in m²:</label>
+      <label for="size" class="left-element">Wohnfläche in m²:</label>
       <input type="text" id="size" name="area"  v-model="sizeHouse">
       <label for="heat" class="left-element">Ihre Energiekennzahl:</label>
       <p class="left-element">Die Energiekennzahl in (kWh) </p>

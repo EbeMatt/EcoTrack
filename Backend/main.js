@@ -6,6 +6,7 @@ const cors = require('cors');
 const randomstring = require('randomstring');
 const nodemailer = require('nodemailer');
 const bcrypt = require('bcrypt');
+const sendMail = require('./sendMail.js');
 
 const DB_USER =  "ecotrackapp";
 const DB_PW =  "";
@@ -715,6 +716,57 @@ app.get('/userData', async (req, res) => {
   }
 });
 
+app.get('/userVehicleData', async (req, res) => {
+  console.log('userVehicledata called!');
+
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const userId = req.query.userId;
+
+  try {
+    const userVehicleDataQuery = 'SELECT Brand, PurchaseDate, Consumption, FuelType, Distance FROM cars WHERE UserID = ?';
+    const userVehicleData = await query(userVehicleDataQuery, [userId]);
+
+    if (userVehicleData.length === 0) {
+      res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    } else {
+      res.json(userVehicleData[0]);
+    }
+  } 
+  catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Fehler beim Abrufen der Benutzerdaten.' });
+  }
+});
+
+app.get('/userHouseData', async (req, res) => {
+  console.log('userHouseData called!');
+
+  const con = connectDB();
+  const query = util.promisify(con.query).bind(con);
+
+  const userId = req.query.userId;
+
+  try {
+
+    const userHouseDataQuery = 'SELECT countHouse, sizeHouse, heat, airHeat, addHeat, temperatur, waterHeat, countMember, powerConsumption, powerSelect, photovoltaik FROM house WHERE UserId = ?';
+    const userHouseData = await query(userHouseDataQuery, [userId]);
+
+    if (userHouseData.length === 0) {
+      res.status(404).json({ error: 'Benutzer nicht gefunden' });
+    }
+    else {
+      res.json(userHouseData[0]);
+    }
+
+  }
+  catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Fehler beim Abrufen der Benutzerdaten.' });
+  }
+});
+
 
 // Gruppe erstellen // noch vervollständigen
 app.post('/groups', async (req, res) => {
@@ -743,6 +795,7 @@ app.post('/groups', async (req, res) => {
 });
 
 // Ichecht die Email ob sie vorhanden ist in der Datenbank umd den user die Einladungsemail zu senden 
+
 app.post('/checkEmail', async (req, res) => {
   console.log('checkEmail is called!');
 
@@ -752,56 +805,16 @@ app.post('/checkEmail', async (req, res) => {
   const email = req.body.email;
 
   try {
-    const user = await query('SELECT * FROM user WHERE Email LIKE ?', [email]);
+    const user = await query('SELECT * FROM `user` WHERE Email LIKE ?', [email]);
 
-    if (user.length > 0) {
+    if (user.length == 0) {
       return res.status(404).json({ message: 'Benutzer nicht gefunden' });
     }
+     // E-Mail-Konfiguration
+     
 
-    res.json({ message: 'Benutzer gefunden' });
-  } catch (error) {
-    console.error('Fehler beim Suchen des Benutzers', error);
-    res.status(500).json({ message: 'Fehler beim Suchen des Benutzers' });
-  }
-});
 
-// erstell eine einladungsemail
-
-app.post('/sendInviteEmail', async (req, res) => {
-  console.log('sendInviteEmail is called!');
-  const con = connectDB();
-  const query = util.promisify(con.query).bind(con);
-
-  const email = req.body.email;
-
-  try {
-    const user = await query('SELECT * FROM user WHERE Email LIKE ?', [email]);
-
-    if (user.length > 0) {
-      return res.status(404).json({ message: 'Benutzer nicht gefunden' });
-    }
-
-    // E-Mail-Konfiguration
-    const transporter = nodemailer.createTransport({
-      host: 'smtp.gmx.net',
-      port: 587, // oder 465 für SSL
-      secure: false, // true für SSL
-      auth: {
-        user: 'ecotrack@gmx.at', 
-        password: 'Ebenberger12!',
-      }
-    });
-
-    const mailOptions = {
-      from: 'ecotrack@gmx.at',
-      to: email,
-      subject: 'Einladung zu EcoTrack',
-      text: 'Du wurdest zu einer Gruppe eingeladen. Bitte registriere dich unter http://localhost:4200/register'
-    };
-
-    // E-Mail senden
-
-    transporter.sendMail(mailOptions, (error, info) => {
+     const cb = (error, info) => {
       if (error) {
         console.error('Fehler beim Senden der E-Mail:', error);
         res.status(500).json({ message: 'Fehler beim Senden der E-Mail' });
@@ -810,13 +823,21 @@ app.post('/sendInviteEmail', async (req, res) => {
         res.json({ message: 'E-Mail erfolgreich gesendet' });
       }
     }
-    );
-  } catch (error) {
-    console.error('Fehler beim Senden der E-Mail:', error);
-    res.status(500).json({ message: 'Fehler beim Senden der E-Mail' });
-  }
+   
+     sendMail(email, 'Du wurdest zu einer Gruppe eingeladen. Bitte registriere dich unter <a href="http://localhost:4200/register">http://localhost:4200/register</a>', cb)
+            
+      
 
+
+    
+  } catch (error) {
+    console.error('Fehler beim Suchen des Benutzers', error);
+    res.status(500).json({ message: 'Fehler beim Suchen des Benutzers' });
+  }
 });
+
+
+
 
 
 // Erstellt eine Email mit einem neuen Passwort und sendet diese dem User 
@@ -846,19 +867,23 @@ app.post('/forgottPassword', async (req, res) => {
     const newPassword = generateRandomPassword();
 
     // Hier können Sie das neue Passwort in die Datenbank speichern, nachdem Sie es gehasht haben
-    const newPasswordHash = await bcrypt.hash(newPassword, 10); // Hier wird das Passwort mit Bcrypt gehasht
+    const newPasswordHash =  sha512(newPassword); // Hier wird das Passwort mit Bcrypt gehasht
 
     // Update-Befehl, um das neue gehashte Passwort in der Datenbank zu speichern
     await query('UPDATE user SET password = ? WHERE name = ? AND email = ?', [newPasswordHash, name, email]);
 
     // E-Mail-Konfiguration
     const transporter = nodemailer.createTransport({
-      host: 'smtp.gmx.net',
+      host: 'mail.gmx.net',
       port: 587, // oder 465 für SSL
-      secure: false, // true für SSL
-      auth: {
-        user: 'ecotrack@gmx.at', // Ihre E-Mail-Adresse
-        pass: 'Ebenberger12!' // Ihr E-Mail-Passwort
+      tls: {
+        ciphers:'SSLv3',
+        rejectUnauthorized: false
+      },
+      debug:true,
+        auth: {
+        user: 'ecotrack@gmx.at',
+        pass: 'Ebenberger12!'
       }
     });
 

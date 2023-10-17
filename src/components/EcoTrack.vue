@@ -287,6 +287,7 @@ body {
     flex-direction: column;
     align-items: center;
     text-align: center;
+    margin: 20px;
     padding-top: 100px;
 }
 
@@ -318,6 +319,7 @@ h1 span {
     text-decoration: underline;
 }
 
+
 p {
     font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
 }
@@ -325,6 +327,7 @@ p {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin: 20px;
 }
 
 .btn-frontPage {
@@ -404,7 +407,7 @@ p {
 
 .loginCard h4 {
     position: absolute;
-    top: -3%;
+    top: 1%;
     right: 5%;
 }
 
@@ -570,7 +573,7 @@ p {
 
 .signUpCard h4 {
     position: absolute;
-    top: -3%;
+    top: 2%;
     right: 5%;
 }
 

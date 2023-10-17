@@ -76,26 +76,14 @@ export default {
             },
             });
 
-            const { emailExist } = response.data;  // echte email sieht er als ungülti und unechte erkennt er nicht 
+            const  emailExist  = response.data;  // echte email sieht er als ungülti und unechte erkennt er nicht 
 
             if (!emailExist) {
                 console.error('Email existiert nicht!');
                 alert('Diese Email existiert nicht!')
                 return;
         } 
-
-        const inviteResponse = await axios.post('http://localhost:3000/sendInviteEmail', {
-          email: this.friendEmail,
-          from: 'ecotrack@gmx.at',
-          subject: 'Einladung zu Eco Challenge',
-          text: 'Hallo, du wurdest von einem Freund zu Eco Challenge eingeladen. Klicke auf den Link, um beizutreten: http://localhost:8080/gamecenter',
-        }, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        console.log('Email wurde versendet', inviteResponse.data);
+        
         this.inviteFriendCount++;
         this.friendEmail = '';
       } catch (error) {

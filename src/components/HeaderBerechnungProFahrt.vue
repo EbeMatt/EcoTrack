@@ -26,7 +26,7 @@
     text-align: center;
     width: 100%;
     height: auto;
-    background-color: rgb(173, 134, 17);
+    background-color: #85b882;
     padding: 10px;
 }
 

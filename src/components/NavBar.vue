@@ -9,26 +9,18 @@
         </li>
         <li>
           <router-link to="../mydate">Meine Daten</router-link>
-        </li>
-        <li>
-          <router-link to="../datapersontable">Datenblatt</router-link>
+          <ul>
+            <li><router-link to="../datapersontable">Datenblatt</router-link></li>
+          </ul>
         </li>
         <li>
           <a href="#">Diagramme</a>
           <ul>
-            <li><a href="#">Haushalt</a></li>
-            <li><a href="#">Auto</a></li>
-            <li><a href="#">Essen</a></li>
+            
             <li>
               <router-link to="../dashboardKlima">Statistiken</router-link>
             </li>
-            <li>
-              <a href="#">Rechner<span class="fa fa-plus"><strong>+</strong></span></a>
-              <ul>
-                <li><a href="#">Spritverbrauch</a></li>
-                <li><a href="#">CO2-Verbrauch</a></li>
-              </ul>
-            </li>
+
           </ul>
         </li>
         <li>

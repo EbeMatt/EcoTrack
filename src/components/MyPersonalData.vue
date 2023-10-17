@@ -5,6 +5,7 @@
       </div>
       
       <div class="box-field">
+        <i class='bx bxs-id-card'></i>
         <label for="name">Name:</label>
         <input type="text" id="name" name="name" placeholder="Name" autocomplete="off">
         <label for="birthday">Geburtstag:</label>
@@ -25,6 +26,56 @@
 
     </div>
     <button class="back-button" @click="closePersonalData">Zurück zu Meine Daten</button>
+
+
+    <div class="info">
+    <div class="list">
+      <ul>
+        <li>Bitte füllen Sie alle Inpufelder aus.</li>
+        <li>Die von Ihnen angegebenen Daten werden Ihnen später im Datenblatt angezeigt.</li>
+        
+      </ul>
+    </div>
+
+
+    <div class="table-palFaktor">
+    <h2>PAL-Faktoren und Aktivitätsniveaus</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>PAL-Faktor</th>
+          <th>Aktivitätsniveau</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0,95</td>
+          <td>Schlafen</td>
+        </tr>
+        <tr>
+          <td>1,2</td>
+          <td>Nur sitzend oder liegend (z. B. lesen, fernsehen)</td>
+        </tr>
+        <tr>
+          <td>1,4-1,5</td>
+          <td>Fast ausschließlich sitzend, wenig Freizeitaktivitäten (z. B. Schreibtischtätigkeit)</td>
+        </tr>
+        <tr>
+          <td>1,6-1,7</td>
+          <td>Überwiegend sitzend, mit zusätzlichen stehenden/gehenden Tätigkeiten (z. B. Kraftfahrer, Studenten, Laboranten)</td>
+        </tr>
+        <tr>
+          <td>1,8-1,9</td>
+          <td>Überwiegend stehende/gehende Tätigkeit (z. B. Verkäufer/innen, Kellner, Handwerker, Hausfrau/Hausmann)</td>
+        </tr>
+        <tr>
+          <td>2,0-2,4</td>
+          <td>Körperlich anstrengende berufliche Tätigkeit (z. B. Bergleute, Landwirte, Waldarbeiter, Hochleistungssportler)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
 
 </div>
 
@@ -106,6 +157,11 @@ body {
   background-image: url('../assets/Background13.png');
     }
 
+    i {
+      font-size: 50px;
+      margin-bottom: 10px;
+      color: #22bc1a;
+    }
   
 
 
@@ -114,10 +170,11 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    margin-right: 750px;
     background: #3c3d42;
     background: linear-gradient(0deg, #f6f8e2 0%, #e0ddca 100%);
     padding: 10px;
-    width: 30%;
+    width: 25%;
     height: auto;
     border-radius: 10px;
     margin-top: 100px;
@@ -204,10 +261,10 @@ body {
 
 .back-button {
   position: absolute;
-  top: 150px;
+  bottom: 100px;
   left: 10px; 
-  background-color: #22bc1a;
-  color: white; 
+  background-color: #85b882;
+  color: black; 
   border: none; 
   border-radius: 5px; 
   cursor: pointer;
@@ -216,7 +273,7 @@ body {
   align-items: center;
   height: 40px;
   padding: 10px 20px; 
-  font-size: 16px;
+  font-size: 12px;
   transition: background-color 0.3s; 
 }
 
@@ -225,6 +282,55 @@ body {
   background-color: #7d861c; 
 }
 
+.list {
+  
+  background-color: #85b882;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 40px;
+  padding: 10px 20px;
+  font-size: 16px;
+  transition: background-color 0.3s;
+}
+
+.table-palFaktor h2 {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.table-palFaktor {
+  
+  background-color: #85b882;
+  color: black;
+  margin-top: 20px; 
+  border-radius: 5px;
+}
+
+.table-palFaktor table {
+  width: 100%; 
+  border-collapse: collapse;
+}
+
+.table-palFaktor th, .table-palFaktor td {
+ 
+  padding: 10px;
+  text-align: center;
+}
+
+.table-palFaktor thead {
+  background-color: #70a26e;
+  color: white;
+}
+
+.info {
+ position: absolute;
+ top: 200px;
+ right: 20px;
+}
 
 
 </style>

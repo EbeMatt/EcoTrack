@@ -5,6 +5,7 @@
     </div>
 
     <div class="box-car">
+      <i class='bx bxs-car'></i>
       <label for="cars">Bezeichnung:</label>
       <select name="cars" id="cars" v-model="selectedCarBrand">
   <option v-for="brand in carBrands" :value="brand" :key="brand">{{ brand }}</option>
@@ -25,7 +26,18 @@
     </div>
     <button class="back-button" @click="closeVehicleCar">Zurück zu Meine Daten</button>
 
-    <canvas id="myChart" width="300" height="300"></canvas>
+    <div class="info">
+    <div class="list">
+      <ul>
+        <li>Bitte füllen Sie alle Inputfelder aus.</li>
+        <li>Die von Ihnen in die Eingabefelder eingegebenen Werte werden als Grundlage für die Berechnung des tatsächlichen Verbrauchs verwendet.</li>
+        <li><strong>Bitte Beachten Sie:</strong>das die Literangabe im Inputfeld festgelegt sein muss damit die Berechnung für Ihren wöchentlichen verbrauch angegeben werden kann.</li>
+        <li>Wir arbeiten daran dies zu beheben!</li>
+      </ul>
+    </div>
+  </div>
+
+    
 
     <table class="eco-table">
     <thead>
@@ -75,7 +87,6 @@
 
 <script>
 import NavBar from "./NavBar.vue";
-import { Chart } from "chart.js";
 import FormularC02Kraftstoff from "./FormularC02Kraftstoff.vue";
 import BerechnungProFahrt from "./BerechnungProFahrt.vue";
 import { parseToken } from './tokenUtils';
@@ -167,7 +178,6 @@ export default {
       distance: null,
       purchase_date: null,
       selectedFuel: 'diesel',
-      chart: null,
       co2Constants: {
         diesel: 2.65,
         benzin: 2.37,
@@ -221,67 +231,6 @@ export default {
     console.log(error);
   });
 
-  this.updateChart();
-  
-},
-
-
-
-updateChart() {
-  if (this.chart) {
-    this.chart.destroy();
-  }
-
-  const ctx = document.getElementById("myChart").getContext("2d");
-  this.chart = new Chart(ctx, {
-    type: "bar",
-    data: {
-      labels: ["Verbrauch je 100 km", "Fahrleistung pro Jahr"],
-      datasets: [
-        {
-          label: "Daten",
-          data: [parseFloat(this.consumption), parseFloat(this.distance)],
-          backgroundColor: ["rgba(75, 192, 192, 0.7)", "rgba(255, 159, 64, 0.7)"],
-          borderColor: ["rgba(75, 192, 192, 1)", "rgba(255, 159, 64, 1)"],
-          borderWidth: 1,
-        },
-      ],
-    },
-    options: {
-      scales: {
-        y: {
-          beginAtZero: true,
-          min: 0,
-          max: 14,
-          stepSize: 2,
-          ticks: {
-            color: "white",
-          },
-        },
-      },
-      plugins: {
-        title: {
-          display: true,
-          color: "white",
-        },
-        legend: {
-          display: true,
-          position: 'bottom',
-          labels: {
-            color: "white",
-          },
-        },
-        datalabels: {
-          display: false,
-        },
-      },
-      bar: {
-        borderWidth: 1,
-        categoryPercentage: 0.5,
-        barPercentage: 1.0,
-      },
-    },
-  });
 },
     calculateCO2(fuel) {
   if (!this.consumption || !this.distance) {
@@ -308,9 +257,7 @@ calculateFootprint(fuel) {
   return footprint.toFixed(2);
 },
   },
-  mounted() {
-    this.updateChart();
-  },
+  
 };
 </script>
 
@@ -331,6 +278,12 @@ body {
   width: 100%;
  
   
+}
+
+i {
+  font-size: 50px;
+  margin-bottom: 10px;
+  color: #22bc1a;
 }
 
 
@@ -479,8 +432,8 @@ td {
   position: absolute;
   top: 150px;
   left: 10px; 
-  background-color: #22bc1a;
-  color: white; 
+  background-color: #85b882;
+  color: black; 
   border: none; 
   border-radius: 5px; 
   cursor: pointer;
@@ -489,7 +442,7 @@ td {
   align-items: center;
   height: 40px;
   padding: 10px 20px; 
-  font-size: 16px; 
+  font-size: 12px; 
   transition: background-color 0.3s; 
 }
 
@@ -500,6 +453,20 @@ td {
 
 .component-spacing {
   margin-top: 50px;
+}
+
+.list {
+  
+  background-color: #85b882; 
+  padding: 10px 20px;
+  border-radius: 5px;
+}
+
+.info {
+ position: absolute;
+ top: 200px;
+ right: 20px;
+ width: 20%;
 }
 
 </style>
